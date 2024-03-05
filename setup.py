@@ -15,11 +15,13 @@ core_requires = [
   'nltk',
   'string',
   'numpy',
+  'setuptools'
 ]
 
 
 setup(
     name='mlx_grph',
+    version='0.0.1',
     packages = find_packages(),
     platforms='any',
     python_requires='>=3.7',
