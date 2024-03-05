@@ -3,6 +3,7 @@ import spacy
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
+from datasets import Dataset
 model_name = "distilroberta-base"
 model = AutoModel.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -85,8 +86,8 @@ def featurize_stories(text, max_len, top_k):
         text_embedding = model(**text_tokens)["pooler_output"]
         text_embedding = text_embedding.detach().numpy()
         embeddings.append(text_embedding)
-    max_emb = max(embedding.shape[0] for embedding in embeddings)
-    padded_embeddings = [np.pad(embedding, ((0, max_emb - embedding.shape[0]), (0, 0))) for embedding in embeddings]
+    max_emb_shape = max(embedding.shape[0] for embedding in embeddings)
+    padded_embeddings = [np.pad(embedding, ((0, max_emb_shape - embedding.shape[0]), (0, 0))) for embedding in embeddings]
     avg_embedding = np.min(padded_embeddings, axis=0)
     distances = cosine_similarity(avg_embedding, candidate_embeddings)
 
@@ -95,11 +96,21 @@ def featurize_stories(text, max_len, top_k):
 
 import nltk, string, numpy as np
 # nltk.download('punkt')
-clean_sentences = []
-p = {'searchTerm':'"weather"','numResults':'10'}
-full_stories = get_npr_stories(p)
-
-
+full_stories = []
+for i in ['"extreme-weather"','"natural-disaster"','"epidemic"','"shooting"']:
+    p = {'searchTerm':i,'numResults':'50'}
+    fs=(get_npr_stories(p))
+    full_stories.append(fs)
+full_stories = [item for sublist in full_stories for item in sublist]
+len(full_stories)
+    
 for i in range(len(full_stories)):
-    cc=featurize_stories(full_stories[i], max_len=512, top_k=5)
-    print(cc)
+    cc=featurize_stories(full_stories[i], max_len=512, top_k=4)
+    # print(cc)
+    rank_articles.append(cc)
+
+import pandas as pd
+full_dataset=pd.DataFrame()
+full_dataset['story'] = pd.DataFrame(full_stories)
+full_dataset[['featA','featB','featC','featD']]=pd.DataFrame(rank_articles)
+Dataset.from_pandas(full_dataset).push_to_hub('Dcolinmorgan/extreme-weather-news',token='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')

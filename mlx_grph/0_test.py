@@ -2,7 +2,7 @@
 # !pip install torch torchvision torchaudio
 # !pip install datasets transformers --upgrade
 # !pip3 install evaluate
-# Import libraries
+import Dataset
 import os,sys,torch,evaluate, numpy as np
 from datasets import load_dataset
 from sklearn.preprocessing import LabelEncoder
@@ -18,28 +18,8 @@ dataset = load_dataset("melisekm/natural-disasters-from-social-media")
 
 model_name = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForMaskedLM.from_pretrained(model_name).to(device)
-model.num_labels = 2
-
-# import pandas as pd, matplotlib.pyplot as plt
-# from cu_cat._dep_manager import deps
-# deps.cuml=None
-# AA = TableVectorizer().fit_transform(dataset['train']['event_type'])
-# pca = PCA(2)
-# pca_data = pd.DataFrame(pca.fit_transform(AA),columns=['PC1','PC2'])
-# kmeans =KMeans(n_clusters=2).fit(AA)
-# pca_data['cluster'] = pd.Categorical(kmeans.labels_)
-# fig,ax = plt.subplots()
-# scatter = ax.scatter(pca_data['PC1'], pca_data['PC2'],c=pca_data['cluster'],cmap='Set3',alpha=0.7)
-# legend1 = ax.legend(*scatter.legend_elements(),
-#                     loc="upper left", title="")
-# ax.add_artist(legend1)
-# plt.savefig('test')
-
-# dataset = dataset.map(lambda examples: {'label': TableVectorizer().fit_transform(examples['label'])}, batched=True)
-# dataset = dataset.map(lambda examples: {'label': KMeans(n_clusters=2).fit(examples['label']).labels_}, batched=True)
-# dataset = dataset.map(lambda examples: {'event_type': 0 if examples['event_type']=='unknown' else 1}, batched=True)
-# dataset = dataset.map(lambda examples: {**{k: v for k, v in examples.items() if k != 'event_type'}, 'event_type': 0 if examples['event_type']=='unknown' else 1}, batched=True)
+# model = AutoModelForMaskedLM.from_pretrained(model_name).to(device)
+# model.num_labels = 2
 
 def change_event_type(example):
     if example['event_type'] == 'unknown':
@@ -50,7 +30,8 @@ def change_event_type(example):
 
 # Apply the function
 dataset = dataset.map(change_event_type)
-dataset.save_to_disk("disaster-tw.hf")
+# dataset.save_to_disk("disaster-tw")
+dataset.push_to_hub('Dcolinmorgan/disaster-tw',token='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')
 
 def tokenize_function(examples):
     return tokenizer(examples["text"], padding="max_length", truncation=True)
