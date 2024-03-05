@@ -4,20 +4,26 @@ name: Manual Run
 on: workflow_dispatch
 
 env:
-  mlx_grph_DIR: mlx_grph
-
-jobs:
-  hello-world:
-    name: Hello world
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check-out mlx_grph repository
-      uses: actions/checkout@v2
-      with:
-        repository: dcolinmorgan/mlx_grph
-        token: ${{ secrets.GITHUB_TOKEN }}
-        path: ${{ env.mlx_grph_DIR }}
-
-    - name: Hello World
-      run: python ${{ env.mlx_grph_DIR }}/hf_weather_featurizer.py
-      shell: sh
+    mlx_grph_DIR: mlx_grph
+  
+  jobs:
+    featurize_news:
+      name: Grab NPR weather news > featurize 
+      runs-on: ubuntu-latest
+      steps:
+      - name: Check-out mlx_grph repository
+        uses: actions/checkout@v2
+        with:
+          repository: dcolinmorgan/mlx_grph
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ env.mlx_grph_DIR }}
+  
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+  
+      - name: Find Weather Features
+        run: python ${{ env.mlx_grph_DIR }}/hf_weather_featurizer.py
+        shell: sh
+  
