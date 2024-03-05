@@ -2,9 +2,6 @@
 
 from setuptools import setup, find_packages
 
-def unique_flatten_dict(d):
-  return list(set(sum( d.values(), [] )))
-
 core_requires = [
   'spacy',
   'bs4',
@@ -17,7 +14,6 @@ core_requires = [
   'numpy',
   'setuptools'
 ]
-
 
 setup(
     name='mlx_grph',
