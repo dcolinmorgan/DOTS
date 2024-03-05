@@ -16,10 +16,9 @@ from dirty_cat import TableVectorizer
 device = torch.device('mps')
 dataset = load_dataset("melisekm/natural-disasters-from-social-media")
 
-model_name = "bert-base-uncased"
+model_name = "distilroberta-base"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForMaskedLM.from_pretrained(model_name).to(device)
-model.num_labels = 2
 
 # import pandas as pd, matplotlib.pyplot as plt
 # from cu_cat._dep_manager import deps
