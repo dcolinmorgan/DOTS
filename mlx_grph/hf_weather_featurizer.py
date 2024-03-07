@@ -4,6 +4,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
 from datasets import Dataset
+import nltk, string, numpy as np
+import requests
+from bs4 import BeautifulSoup
+import xml.etree.ElementTree as ET
+
 model_name = "distilroberta-base"
 model = AutoModel.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -11,12 +16,7 @@ nlp = spacy.load('en_core_web_sm')
 n_gram_range = (1, 2)
 stop_words = "english"
 embeddings=[]
-
-import requests
-from bs4 import BeautifulSoup
-import xml.etree.ElementTree as ET
 p = {'searchTerm':'"natural disaster"','numResults':'10'}
-
 
 def get_npr_stories(p):
     # Send a GET request to the NPR API
@@ -94,23 +94,47 @@ def featurize_stories(text, max_len, top_k):
     return [candidates[index] for index in distances.argsort()[0][::-1][-top_k:]]
 
 
-import nltk, string, numpy as np
+
 # nltk.download('punkt')
-full_stories = []
-for i in ['"extreme-weather"','"natural-disaster"','"epidemic"','"shooting"']:
-    p = {'searchTerm':i,'numResults':'50'}
-    fs=(get_npr_stories(p))
-    full_stories.append(fs)
-full_stories = [item for sublist in full_stories for item in sublist]
-len(full_stories)
+# full_stories = []
+# for i in ['"extreme-weather"','"natural-disaster"','"epidemic"','"shooting"']:
+#     p = {'searchTerm':i,'numResults':'50'}
+#     fs=(get_npr_stories(p))
+#     full_stories.append(fs)
+# full_stories = [item for sublist in full_stories for item in sublist]
+# len(full_stories)
+
     
-for i in range(len(full_stories)):
-    cc=featurize_stories(full_stories[i], max_len=512, top_k=4)
-    # print(cc)
-    rank_articles.append(cc)
+
+# for i in range(len(full_stories)):
+#     cc=featurize_stories(full_stories[i], max_len=512, top_k=4)
+#     # print(cc)
+#     rank_articles.append(cc)
+
+# import pandas as pd
+# full_dataset=pd.DataFrame()
+# full_dataset['story'] = pd.DataFrame(full_stories)
+# full_dataset[['featA','featB','featC','featD']]=pd.DataFrame(rank_articles)
+# Dataset.from_pandas(full_dataset).push_to_hub('Dcolinmorgan/extreme-weather-news',token='***')
 
 import pandas as pd
-full_dataset=pd.DataFrame()
-full_dataset['story'] = pd.DataFrame(full_stories)
-full_dataset[['featA','featB','featC','featD']]=pd.DataFrame(rank_articles)
-Dataset.from_pandas(full_dataset).push_to_hub('Dcolinmorgan/extreme-weather-news',token='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')
+# data=pd.read_csv('/content/drive/MyDrive/consult/Louie_disaster_tweets.csv',header=None)
+data=pd.read_csv('florida-hurricane-tweet.csv')
+
+rank_articles=[]
+from tqdm import tqdm
+for i in tqdm(range(len(data['text']))):
+    try:
+        cc=featurize_stories(data['text'][i], max_len=512, top_k=4)
+        # print(cc)
+        rank_articles.append(cc)
+    except IndexError:
+        pass
+
+flattened_list = [item for sublist in rank_articles for item in sublist]
+from collections import Counter
+counter = Counter(flattened_list)
+df = pd.DataFrame.from_dict(counter, orient='index', columns=['Count'])
+
+df = df.sort_values(by='Count',ascending=False)
+df.to_csv('florida-hurricane-tweet_features.txt',sep='\t')
