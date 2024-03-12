@@ -1,0 +1,30 @@
+{
+  "name": "mlx_grph",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "spacy": "",
+    "bs4": "",
+    "scikit-learn": "",
+    "transformers": "",
+    "torch": "",
+    "requests": "",
+    "xml": "",
+    "nltk": "",
+    "string": "",
+    "numpy": "",
+    "setuptools": "",
+    "subprocess": "",
+    "json": "",
+    "string": "",
+    "csv": "",
+    "dotenv": "^10.0.0",
+  }
+}
