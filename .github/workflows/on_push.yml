@@ -3,7 +3,7 @@ name: Push Run
 
 on: 
   push
-    paths:
+      paths:
       - "projects.md"
 
 env:
