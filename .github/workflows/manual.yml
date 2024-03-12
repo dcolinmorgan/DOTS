@@ -1,8 +1,7 @@
 
 name: Manual Workflow
 
-on: 
-    workflow_dispatch:
+on: workflow_dispatch
 
 env:
     mlx_grph_DIR: mlx_grph
@@ -25,6 +24,6 @@ jobs:
             python -m pip install -e .
 
         - name: Find Weather Features
-        run: python ${{ env.mlx_grph_DIR }}/hf_weather_featurizer.py
+        run: python ${{ env.mlx_grph_DIR }}/DT_feat.py
         shell: sh
   
