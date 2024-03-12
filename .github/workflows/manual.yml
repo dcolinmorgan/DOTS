@@ -10,7 +10,7 @@ on:
             - "projects.md"
         
 env:
-mlx_grph_DIR: mlx_grph
+    mlx_grph_DIR: mlx_grph
 
 jobs:
     featurize_news:
