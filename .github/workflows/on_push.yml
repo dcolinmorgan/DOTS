@@ -3,17 +3,13 @@ name: Push Run
 
 on: 
   push
-    tags:
-      - '*'  
-    paths:
-      - "projects.md"
 
 env:
   mlx_grph_DIR: mlx_grph
 
 jobs:
   featurize_news:
-    name: OpenSearch news > featurize > pipeline
+    name: OpenSearch news, featurize, pipeline
     runs-on: ubuntu-latest
     steps:
     - name: Check-out mlx_grph repository
