@@ -1,0 +1,139 @@
+{
+  "took": 6,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": 1.0,
+    "hits": [
+      {
+        "_index": "emergency-management-news",
+        "_id": "3f96a00d-a933-454c-8e33-ee270e59bab7",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "Live updates | US bombs Yemen's Houthis, and Israeli strikes kill 158 in Gaza",
+            "DocumentIdentifier": "https://www.bdtonline.com/news/nation_world/live-updates-us-bombs-yemens-houthis-and-israeli-strikes-kill-158-in-gaza/article_c436331e-3b63-5d3d-bf4f-7f9b7f66f9dc.html"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "f0ef4a6a-0998-47c7-b22f-b9f0bf509b50",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "After over 100 days of war, Palestinians fight in hard-hit areas of Gaza and fire rockets at Israel",
+            "DocumentIdentifier": "https://www.newsday.com/news/nation/israel-hamas-war-news-01-16-2024-v85820"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "01d60204-56c5-420a-878f-64eccc992258",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "Residents Of Once-Lost Roman Estate Likely Watched Thousands Die In Ancient Cataclysm, Researchers Claim",
+            "DocumentIdentifier": "https://dailycaller.com/2024/01/16/villa-naples-bacoli-sicily-italy-vesuvius-romans-pliny-the-elder-miseno-beach/"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "e8c3a9ab-1c32-4e49-960b-fda28e139513",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "Licensed firearm holder killed in Old Harbour identified",
+            "DocumentIdentifier": "https://jamaica-gleaner.com/article/news/20240116/licensed-firearm-holder-killed-old-harbour-identified"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "3babd011-e4be-413e-85c9-8111cb531599",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "Snow drought over: NYC, DC blanketed by biggest storm in 2 years",
+            "DocumentIdentifier": "https://www.aol.com/snow-drought-over-nyc-dc-162942149.html"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "22bc6bf8-7231-44b4-9792-52dc5c99d3a1",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "New Bedford Juvenile Arrested for Carrying Firearm and Ammunition",
+            "DocumentIdentifier": "https://fun107.com/new-bedford-juvenile-arrested/"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "532a781b-428e-4177-8e94-ba3337607514",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "Fire Crews Attend To Extensive House Fire in North Clare",
+            "DocumentIdentifier": "https://www.clare.fm/news/fire-crews-attend-extensive-house-fire-north-clare/"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "83a3b71b-0dfe-4487-adb9-e64654a7c947",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116194500",
+            "page_title": "Earthquake near Gilroy, Watsonville &#x2013; NBC Bay Area",
+            "DocumentIdentifier": "https://www.nbcbayarea.com/news/local/earthquakes/earthquake-near-gilroy-watsonville/3424192/"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "875ad3ed-61c2-4c23-af4a-7164524bdd37",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116161500",
+            "page_title": "Syrians lose WFP lifeline as US slashes funding",
+            "DocumentIdentifier": "https://syriadirect.org/syrians-lose-wfp-lifeline-as-us-slashes-funding/"
+          }
+        }
+      },
+      {
+        "_index": "emergency-management-news",
+        "_id": "a20f64a6-2d24-4631-8850-390dd5f32c68",
+        "_score": 1.0,
+        "_source": {
+          "metadata": {
+            "GDELT_DATE": "20240116161500",
+            "page_title": "An Icelandic town is evacuated after a volcanic eruption sends lava into nearby homes",
+            "DocumentIdentifier": "https://www.wgbh.org/news/international-news/2024-01-16/an-icelandic-town-is-evacuated-after-a-volcanic-eruption-sends-lava-into-nearby-homes"
+          }
+        }
+      }
+    ]
+  }
+}
