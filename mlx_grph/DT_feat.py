@@ -1,13 +1,15 @@
-# conda install numpy spacy ipykernel pandas scikit-learn scipy nltk
-# torch install bs4 transformers
-
+# conda create -n DT ipykernel 
+# python -m ipykernel install --user --name DT
+# pip install torch bs4 transformers spacy numpy pandas scikit-learn scipy nltk
+from bs4 import BeautifulSoup
 import numpy as np
+from tqdm import tqdm
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
 import torch, subprocess, json, requests, spacy,nltk, string, csv
 nltk.download('punkt')  # run once
-from bs4 import BeautifulSoup
+import subprocess, json, requests,string,csv
 
 model_name = "distilroberta-base"
 model = AutoModel.from_pretrained(model_name)
@@ -17,8 +19,8 @@ nlp = spacy.load('en_core_web_sm')
 n_gram_range = (1, 2)
 stop_words = "english"
 embeddings=[]
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model.to(device)
 
 
 def chunk_text(text, max_len):
@@ -55,7 +57,7 @@ def featurize_stories(text, max_len, top_k):
     all_nouns = nouns.union(noun_phrases)
     candidates = list(filter(lambda candidate: candidate in all_nouns, all_candidates))
     candidate_tokens = tokenizer(candidates, padding=True, return_tensors="pt")
-    candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
+    # candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
     candidate_embeddings = model(**candidate_tokens)["pooler_output"]
     candidate_embeddings = candidate_embeddings.detach()#.to_numpy()
 
@@ -65,7 +67,7 @@ def featurize_stories(text, max_len, top_k):
 
     for chunk in chunks:
         text_tokens = tokenizer(chunk, padding=True, return_tensors="pt")
-        text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
+        # text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
         text_embedding = model(**text_tokens)["pooler_output"]
         text_embedding = text_embedding.detach()#.to_numpy()
         embeddings.append(text_embedding)
@@ -79,14 +81,19 @@ def featurize_stories(text, max_len, top_k):
 
 
 
-get_data = """
-curl -X GET "https://louie_armstrong:peach-Jam-42-prt@search-opensearch-dev-domain-7grknmmmm7nikv5vwklw7r4pqq.us-east-1.es.amazonaws.com/emergency-management-news/_search" -H 'Content-Type: application/json' -d '{
-    "_source": ["metadata.GDELT_DATE", "metadata.page_title", "metadata.DocumentIdentifier", "metadata.Extras", "metadata.Locations"],
-    "query": {
-    "match_all": {}
-    }
-}' | jq . > data.json
-"""
+def get_data():
+    bash_command = """
+    curl -X GET "https://louie_armstrong:peach-Jam-42-prt@search-opensearch-dev-domain-7grknmmmm7nikv5vwklw7r4pqq.us-east-1.es.amazonaws.com/emergency-management-news/_search" -H 'Content-Type: application/json' -d '{
+        "_source": ["metadata.GDELT_DATE", "metadata.page_title", "metadata.DocumentIdentifier", "metadata.Extras", "metadata.Locations"],
+        "query": {
+        "match_all": {}
+        }
+    }'
+    """
+    process = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
+    output = process.stdout
+    return json.loads(output)
+
 
 def process_data(data):
     articles=[]
@@ -110,7 +117,7 @@ def process_data(data):
                 z.append(p.get_text())
             writer.writerow(z)
             writer.writerow(['\n'])
-        articles.append(z)
+            articles.append(z)
 
     with open('output.html', 'w') as file:
         file.write(str(soup))
@@ -120,18 +127,13 @@ def process_data(data):
     
     return articles
 
-subprocess.run(get_data, shell=True)
-with open('data.json') as f:
-    data = json.load(f)
+data = get_data()
 articles = process_data(data)
 
 rank_articles=[]
-from tqdm import tqdm
-for i in tqdm(z):
+for i in tqdm(articles[1:]):
     try:
-        cc=featurize_stories(articles, max_len=512, top_k=4)
-        # print(cc)
+        cc=featurize_stories(str(i), max_len=512, top_k=4)
         rank_articles.append(cc)
-        print(cc)
     except IndexError:
         pass
