@@ -14,7 +14,7 @@ env:
 
 jobs:
     featurize_news:
-        name: OpenSearch news > featurize > pipeline
+        name: OpenSearch news | featurize | pipeline
         runs-on: ubuntu-latest
         steps:
         - name: Check-out mlx_grph repository

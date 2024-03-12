@@ -3,7 +3,9 @@ name: Push Run
 
 on: 
   push
-      paths:
+    tags:
+      - '*'  
+    paths:
       - "projects.md"
 
 env:
