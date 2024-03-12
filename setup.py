@@ -5,14 +5,19 @@ from setuptools import setup, find_packages
 core_requires = [
   'spacy',
   'bs4',
-  'sklearn',
+  'scikit-learn',
   'transformers',
+  'torch',
   'requests',
   'xml',
   'nltk',
   'string',
   'numpy',
-  'setuptools'
+  'setuptools',
+  'subprocess',
+  'json',
+  'string',
+  'csv',
 ]
 
 setup(
@@ -20,11 +25,11 @@ setup(
     version='0.0.1',
     packages = find_packages(),
     platforms='any',
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     install_requires=core_requires,
     license='BSD',
     classifiers=[
         'Development Status :: 0 - Fun',
     ],
-    keywords=['news cpu featurizer']
+    keywords=['OpenSearch news featurizer pipeline']
 )

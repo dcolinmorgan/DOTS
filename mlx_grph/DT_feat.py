@@ -3,13 +3,12 @@
 # pip install torch bs4 transformers spacy numpy pandas scikit-learn scipy nltk
 from bs4 import BeautifulSoup
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
-import torch, subprocess, json, requests, spacy,nltk, string, csv
+import torch, spacy,nltk,subprocess, json, requests,string,csv
 nltk.download('punkt')  # run once
-import subprocess, json, requests,string,csv
 
 model_name = "distilroberta-base"
 model = AutoModel.from_pretrained(model_name)
@@ -131,7 +130,7 @@ data = get_data()
 articles = process_data(data)
 
 rank_articles=[]
-for i in tqdm(articles[1:]):
+for i in articles[1:]:
     try:
         cc=featurize_stories(str(i), max_len=512, top_k=4)
         rank_articles.append(cc)
