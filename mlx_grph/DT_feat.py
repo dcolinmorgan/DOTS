@@ -3,6 +3,7 @@
 # pip install torch bs4 transformers spacy numpy pandas scikit-learn scipy nltk
 from bs4 import BeautifulSoup
 import argparse
+from datetime import datetime
 import numpy as np
 import concurrent.futures
 # from tqdm import tqdm
@@ -14,8 +15,8 @@ import torch, spacy,nltk,subprocess, json, requests,string,csv
 
 parser = argparse.ArgumentParser(description='Process OS data for dynamic features.')
 parser.add_argument('-n', type=int, default=10, help='Number of data items to get')
-parser.add_argument('-f', type=int, default=13, help='Number of features per item to get')
-parser.add_argument('-o', '--output', default='OS_feats.csv', help='Output file name')
+parser.add_argument('-f', type=int, default=3, help='Number of features per item to get')
+parser.add_argument('-o', type=str, default='OS_feats.csv', help='Output file name')
 args = parser.parse_args()
 
 
@@ -58,9 +59,12 @@ def featurize_stories(text, top_k, max_len):
     doc = nlp(text)
     noun_phrases = set(chunk.text.strip().lower() for chunk in doc.noun_chunks)
     nouns = set()
+    datetimes = set()
     for token in doc:
         if token.pos_ == "NOUN":
             nouns.add(token.text)
+        if token.ent_type_ == "DATE":
+            datetimes.add(token.text)  # no need to tokenize dates, just add to feature list artificially by repeating
 
     all_nouns = nouns.union(noun_phrases)
     candidates = list(filter(lambda candidate: candidate in all_nouns, all_candidates))
@@ -90,27 +94,19 @@ def featurize_stories(text, top_k, max_len):
 def get_data(n=args.n):
     bash_command = f"""
     curl -X GET "https://louie_armstrong:peach-Jam-42-prt@search-opensearch-dev-domain-7grknmmmm7nikv5vwklw7r4pqq.us-east-1.es.amazonaws.com/emergency-management-news/_search" -H 'Content-Type: application/json' -d '{{
-        "_source": ["metadata.GDELT_DATE", "metadata.page_title", "metadata.DocumentIdentifier"],
+        "_source": ["metadata.GDELT_DATE", "metadata.page_title", "metadata.DocumentIdentifier", "metadata.Locations", "metadata.Extras"],
         "size": {n},
         "query": {{
         "match_all": {{}}
         }}
     }}'
     """
-    # print(f"Running command: {bash_command}")  # Print the command that will be run
-
+    
     process = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
-
-    # print(f"Command output: {process.stdout}")  # Print the output of the command
-    # print(f"Command error: {process.stderr}")  # Print the error output of the command
-
     output = process.stdout
     data = json.loads(output)
-
-    # print(f"Data: {data}")  # Print the data that will be returned
-
     return data
-
+"""
 def get_big_data():
     from elasticsearch import Elasticsearch
 
@@ -147,10 +143,10 @@ def process_data(data):
     with open('output.csv', 'w') as file:
         writer = csv.writer(file)
         for hit in hits:
-            z=[]
+            # z=[]
             source = hit['_source']
             GDELT_DATE = source['metadata']['GDELT_DATE']
-            # Locations = source['metadata']['Locations']
+            Locations = source['metadata']['Locations']
             # Extras = source['metadata']['Extras']
             page_title = source['metadata']['page_title']
             url = source['metadata']['DocumentIdentifier']
@@ -160,31 +156,55 @@ def process_data(data):
             # print(soup.find('content'))
             for p in soup.find_all('p'):
                 z.append(p.get_text())
-            writer.writerow(z)
-            writer.writerow(['\n'])
-            articles.append(z)
+                articles.append(page_title)
+                articles.append(zGDELT_DATE)
+                articles.append(Locations)
+                articles.append(z)
+                
+                writer.writerow(page_title)
+                writer.writerow(GDELT_DATE)
+                writer.writerow(Locations)
+                writer.writerow(z)
+                writer.writerow(['\n'])
+                
 
-    with open('output.html', 'w') as file:
-        file.write(str(soup))
+    # with open('output.html', 'w') as file:
+    #     file.write(str(soup))
         
-    with open('output.csv', 'w') as file:
-        file.write(str(z))
+    # with open('output.csv', 'w') as file:
+    #     file.write(str(articles))
     
     return articles
-
+"""
 
 def process_hit(hit):
-    z = []
+    text = []
     source = hit['_source']
-    GDELT_DATE = source['metadata']['GDELT_DATE']
-    page_title = source['metadata']['page_title']
+    date = datetime.strptime(source['metadata']['GDELT_DATE'], "%Y%m%d%H%M%S")
+    date = formatted_date = date.strftime("%d-%m-%Y")
+    loc = source['metadata']['Locations']
+    loc = loc.replace("'", '"')  # json requires double quotes for keys and string values
+    list_of_dicts = json.loads(loc)
+    location_full_names = [dict['Location FullName'] for dict in list_of_dicts if 'Location FullName' in dict]
+    loc = location_full_names[0]
+    ex = source['metadata']['Extras']
+    title = source['metadata']['page_title']
     url = source['metadata']['DocumentIdentifier']
 
     response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Failed to get {url}")
+        return text,None,date,loc,title
+
     soup = BeautifulSoup(response.text, 'html.parser')
-    for p in soup.find_all('p'):
-        z.append(p.get_text())
-    return z, soup
+    paragraphs = soup.find_all(['p'])
+    if not paragraphs:
+        print(f"No <p> tags in {url}")
+        return text,soup,date,loc,title
+
+    for p in paragraphs:
+        text.append(p.get_text())
+    return text,soup,date,loc,title
 
 def process_data_fast(data):
     articles = []
@@ -195,10 +215,13 @@ def process_data_fast(data):
 
     with open('output.csv', 'w') as file:
         writer = csv.writer(file)
-        for z, soup in results:
-            writer.writerow(z)
+        for text, soup,date,loc,title in results:
+            articles.append([loc,date,text])
+            # articles.append(text)
+
+            writer.writerow([loc,date,text]) # force location into top feature, also assume title has important info
+            # writer.writerow(text)
             writer.writerow(['\n'])
-            articles.append(z)
 
     with open('output.html', 'w') as file:
         file.write(str(results[-1][1]))  # Write the soup of the last hit
@@ -210,18 +233,19 @@ def process_data_fast(data):
 
 
 data = get_data(args.n)
-# data = get_big_data()
-# articles = process_data(data)
 articles = process_data_fast(data)
 
 rank_articles=[]
-for i in articles[1:]:
+for i in articles:
+    parts=str(i).split('[', 3)
+    
     try:
         cc=featurize_stories(str(i), top_k = args.f, max_len=512)
-        rank_articles.append(cc)
-    except IndexError:
+        rank_articles.append([parts[1],cc])
+        print([parts[1],cc])
+    except:
         pass
 
-with open('OS_feats.csv', 'w', newline='') as file:
+with open(args.o, 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerows(rank_articles)
