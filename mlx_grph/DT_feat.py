@@ -28,7 +28,7 @@ args, unknown = parser.parse_known_args()
 model_name = "distilroberta-base"
 model = AutoModel.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-!python -m spacy download en_core_web_sm
+# !python -m spacy download en_core_web_sm
 nlp = spacy.load('en_core_web_sm')
 
 # Define constants
