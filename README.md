@@ -33,4 +33,4 @@ nltk,
 
 
 here is an example produced every time CI runs:
- ![Table](table.txt)
+ ![Table](OS_Feats.csv)

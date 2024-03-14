@@ -43,6 +43,7 @@ def chunk_text(text, max_len):
     tokens = nltk.word_tokenize(text)
     num_chunks = len(tokens) // max_len
     final_chunk_size = len(tokens) % max_len
+    logging.info(f"chunking artcile into {num_chunks} chunks")
     # If the final chunk is too small, distribute its tokens among the other chunks
     if final_chunk_size < max_len / 2:
         num_chunks += 1
@@ -69,15 +70,15 @@ def featurize_stories(text, top_k, max_len):
     all_nouns = nouns.union(noun_phrases)
     candidates = list(filter(lambda candidate: candidate in all_nouns, all_candidates))
     candidate_tokens = tokenizer(candidates, padding=True, return_tensors="pt")
-    # candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
+    if device == 'cuda':
+        candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
     candidate_embeddings = model(**candidate_tokens)["pooler_output"]
-    candidate_embeddings = candidate_embeddings.detach()#.to_numpy()
-    # words = nltk.word_tokenize(text)
-    # chunks = [words[i:i + 512] for i in range(0, len(words), 512)]
+    candidate_embeddings = candidate_embeddings.detach()  # .to_numpy
     chunks = chunk_text(text, max_len)  # use this to chunk better and use less padding thus less memory but also less affect from averging
     for chunk in chunks:
         text_tokens = tokenizer(chunk, padding=True, return_tensors="pt")
-        # text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
+        if device == 'cuda':
+            text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
         text_embedding = model(**text_tokens)["pooler_output"]
         text_embedding = text_embedding.detach()#.to_numpy()
         embeddings.append(text_embedding)
@@ -124,15 +125,15 @@ def process_hit(hit):
     try:
         response = requests.get(url)
     except requests.exceptions.ConnectionError:  #
-        print(f"timeout for {url}")
+        logging.info(f"timeout for {url}")
         return text,date,loc,title
     if response.status_code != 200:
-        print(f"Failed to get {url}")
+        logging.info(f"Failed to get {url}")
         return text,date,loc,title
     soup = BeautifulSoup(response.text, 'html.parser')
     paragraphs = soup.find_all(['p'])
     if not paragraphs:
-        print(f"No <p> tags in {url}")
+        logging.info(f"No <p> tags in {url}")
         return text,date,loc,title
     for p in paragraphs:
         text.append(p.get_text())

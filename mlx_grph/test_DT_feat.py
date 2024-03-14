@@ -12,6 +12,7 @@ def test_process_hit(data=get_data(1)):
 
 def test_featurize_stories(data=get_data(5)):
     articles = process_data(data)
+    assert len(articles) == 5
     try:  #since some stories will be unretreatable
         features = featurize_stories(str(articles), 4, 512)
         assert len(features) == 4
