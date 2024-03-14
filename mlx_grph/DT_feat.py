@@ -7,11 +7,14 @@ from tqdm import tqdm
 from datetime import datetime
 import numpy as np
 import concurrent.futures
+from dotenv import load_dotenv
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
-import torch, spacy,nltk,subprocess, json, requests,string,csv,logging
+import torch, spacy,nltk,subprocess, json, requests,string,csv,logging,os
 nltk.download('punkt')  # run once
+load_dotenv()
+os_url = os.getenv('OS_TOKEN')
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -92,7 +95,7 @@ def featurize_stories(text, top_k, max_len):
 
 def get_data(n=args.n):
     bash_command = f"""
-    curl -X GET "https://louie_armstrong:peach-Jam-42-prt@search-opensearch-dev-domain-7grknmmmm7nikv5vwklw7r4pqq.us-east-1.es.amazonaws.com/emergency-management-news/_search" -H 'Content-Type: application/json' -d '{{
+    curl -X GET "{os_url}" -H 'Content-Type: application/json' -d '{{
         "_source": ["metadata.GDELT_DATE", "metadata.page_title", "metadata.DocumentIdentifier", "metadata.Locations", "metadata.Extras"],
         "size": {n},
         "query": {{
