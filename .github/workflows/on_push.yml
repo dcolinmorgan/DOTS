@@ -39,5 +39,5 @@ jobs:
     - name: Minimal tests
       run: |
           source mlx_grph/bin/activate
-          ython -m spacy download en_core_web_sm
+          python -m spacy download en_core_web_sm
           python mlx_grph/DT_feat.py -n 5 -f 3 -s 1 -o table.txt
