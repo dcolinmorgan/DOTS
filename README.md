@@ -13,7 +13,7 @@ torch,
 requests,
 xml,
 nltk,
-
+ 
 ### the example below will pull 10 OS stories and return 5 features each in additon to location and date to a file
 
 ```python
@@ -32,3 +32,5 @@ nltk,
 >"'Iceland', '16-01-2024', ","['lava flows', 'evacuation', 'eruptions', 'jóhannesson', 'lúðvík pétursson']"<br>
 
 
+here is an example produced every time CI runs:
+ ![Table](table.txt)
