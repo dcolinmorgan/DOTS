@@ -22,7 +22,7 @@ parser.add_argument('-n', type=int, default=10, help='Number of data items to ge
 parser.add_argument('-f', type=int, default=3, help='Number of features per item to get')
 parser.add_argument('-o', type=str, default='OS_feats.csv', help='Output file name')
 parser.add_argument('-s', type=int, default=1, help='Parallelize requests')
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 
 # Load models and tokenizers
 model_name = "distilroberta-base"
@@ -159,7 +159,7 @@ def process_data(data,fast=args.s):
 
 
 # Main pipeline
-def main():
+def main(args):
     data = get_data(args.n)
     articles = process_data(data)
     rank_articles=[]
@@ -175,4 +175,4 @@ def main():
         writer.writerows(rank_articles)
 
 if __name__ == "__main__":
-    main()
+    main(args)
