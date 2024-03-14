@@ -35,9 +35,13 @@ jobs:
           source mlx_grph/bin/activate
           python -m spacy download en_core_web_sm
           python mlx_grph/test_DT_feat.py
+      env:
+          OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
     - name: Minimal tests 2
       run: |
           source mlx_grph/bin/activate
           python -m spacy download en_core_web_sm
           python mlx_grph/DT_feat.py -n 5 -f 3 -s 1 -o OS_feats.csv
+      env:
+          OS_TOKEN: ${{ secrets.OS_TOKEN }}
