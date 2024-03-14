@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
 
-      - name: Minimal tests
-        run: |
-            source mlx_grph/bin/activate
-            python mlx_grph/test_DT_feat.py
+    - name: Minimal tests
+      run: |
+          source mlx_grph/bin/activate
+          python mlx_grph/test_DT_feat.py
