@@ -3,6 +3,7 @@
 from setuptools import setup, find_packages
 
 core_requires = [
+  'pytest',
   'spacy',
   'bs4',
   'scikit-learn',
