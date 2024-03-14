@@ -10,27 +10,20 @@ core_requires = [
   'transformers',
   'torch',
   'requests',
-  'xml',
   'nltk',
-  'string',
   'numpy',
-  'setuptools',
-  'subprocess',
-  'json',
-  'string',
-  'csv',
 ]
 
 setup(
     name='mlx_grph',
     version='0.0.1',
-    packages = find_packages(),
+    packages=find_packages(),
     platforms='any',
     python_requires='>=3.8',
     install_requires=core_requires,
     license='BSD',
     classifiers=[
-        'Development Status :: 0 - Fun',
+        'Development Status :: 2 - Pre-Alpha',
     ],
     keywords=['OpenSearch news featurizer pipeline']
 )
