@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 core_requires = [
   'pytest',
   'spacy',
-  'dotenv',
+  'python-dotenv',
   'bs4',
   'scikit-learn',
   'transformers',
