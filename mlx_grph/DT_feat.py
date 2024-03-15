@@ -2,7 +2,7 @@
 # python -m ipykernel install --user --name DT
 # pip install torch bs4 transformers spacy numpy pandas scikit-learn scipy nltk
 from bs4 import BeautifulSoup
-import argparse
+import argparse, signal
 from tqdm import tqdm
 from datetime import datetime
 import numpy as np
@@ -41,6 +41,9 @@ embeddings=[]
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
+def handler(signum, frame):
+    raise TimeoutError()
+signal.signal(signal.SIGALRM, handler)
 
 # Define functions
 def get_data(n=args.n):
@@ -97,18 +100,41 @@ def process_data(data,fast=args.s):
     articles = []
     results=[]
     hits = data['hits']['hits']
-    if fast==0:
-        for hit in hits:
-            results.append(process_hit(hit))
-    else:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = list(executor.map(process_hit, hits))
+    
+    for hit in tqdm(hits, desc="grabbing text from url"):
+        if fast==0:
+            try:
+                results.append(process_hit(hit))
+                signal.alarm(5)
+            except:
+                logging.info(f"Grabbing the url stalled after 5s, skipping...")
+                pass
+        else:
+            e = concurrent.futures.ThreadPoolExecutor()
+            try:
+                future = e.submit(process_hit, hit)
+                result = future.result(timeout=5)  # Set timeout for 5 seconds
+                results.append(result)
+            except concurrent.futures.TimeoutError:
+                logging.info(f"Grabbing the url stalled after 5s, skipping...")
+# else:
+    #     e = concurrent.futures.ThreadPoolExecutor()
+    #     # with concurrent.futures.ThreadPoolExecutor() as executor:
+    #     for 
+    #         try:
+    #             future = executor.submit(process_hit, hits)
+    #             result = future.result(timeout=5)  # Set timeout for 5 seconds
+    #             results = list(executor.map(process_hit, hits).result(timeout=5))
+    #         except concurrent.futures.TimeoutError:
+    #             print("The function took too long to complete, skipping...")
+            
     with open('output.csv', 'w') as file:
         writer = csv.writer(file)
         for text,date,loc,title in results:
             articles.append([loc,date,text])
             writer.writerow([loc,date,text]) # force location into top feature, also assume title has important info
             writer.writerow(['\n'])
+    signal.alarm(0)
     return articles
 
 
@@ -143,15 +169,15 @@ def featurize_stories(text, top_k, max_len):
     all_nouns = nouns.union(noun_phrases)
     candidates = list(filter(lambda candidate: candidate in all_nouns, all_candidates))
     candidate_tokens = tokenizer(candidates, padding=True, return_tensors="pt")
-    if device == 'cuda':
-        candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
+    # if device == 'cuda':
+    candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
     candidate_embeddings = model(**candidate_tokens)["pooler_output"]
     candidate_embeddings = candidate_embeddings.detach()  # .to_numpy
     chunks = chunk_text(text, max_len)  # use this to chunk better and use less padding thus less memory but also less affect from averging
     for chunk in chunks:
         text_tokens = tokenizer(chunk, padding=True, return_tensors="pt")
-        if device == 'cuda':
-            text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
+        # if device == 'cuda':
+        text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
         text_embedding = model(**text_tokens)["pooler_output"]
         text_embedding = text_embedding.detach()#.to_numpy()
         embeddings.append(text_embedding)
@@ -169,7 +195,7 @@ def main(args):
     data = get_data(args.n)
     articles = process_data(data)
     rank_articles=[]
-    for i in tqdm(articles):
+    for i in tqdm(articles, desc="featurizing articles' text"):
         parts=str(i).split('[', 3)
         try:
             cc=featurize_stories(str(i), top_k = args.f, max_len=512)
