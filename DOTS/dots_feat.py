@@ -50,8 +50,29 @@ def handler(signum, frame):
     raise TimeoutError()
 signal.signal(signal.SIGALRM, handler)
 
+
 # Define functions
 def get_data(n=args.n):  # , s=args.s, e=args.e):
+    bash_command = f"""
+    curl -X GET "{os_url}/emergency-management-news/_search" -H 'Content-Type: application/json' -d '{{
+    "_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
+        "size": {n},
+        "query": {{
+            "bool": {{
+                "must": [
+                    {{"match_all": {{}}}}
+                ]
+            }}
+        }}
+    }}'
+    """
+    process = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
+    output = process.stdout
+    data = json.loads(output)
+    return data
+
+
+def get_massive_data(n=args.n):
     bash_command1 = f"""
     curl -X GET "{os_url}/emergency-management-news/_search?scroll=1m" -H 'Content-Type: application/json' -d '{{
     "_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
@@ -77,17 +98,11 @@ def get_data(n=args.n):  # , s=args.s, e=args.e):
         json.dump(data, f)
     with open("DOTS/input/feat_input.json", 'r') as f:
         data = json.load(f)
-    # if n <=10000:
-        # return data
-    # else:
+
     scroll_id = data['_scroll_id']
 
-    # Keep scrolling until no more results
     while len(data['hits']['hits']):
-        # Process results
-        # ...
 
-        # Scroll request
         bash_command2 = f"""
         curl -X GET "{os_url}/_search/scroll" -H 'Content-Type: application/json' -d '{{
             "scroll" : "1m",
@@ -98,7 +113,7 @@ def get_data(n=args.n):  # , s=args.s, e=args.e):
         output = process.stdout
         data = json.loads(output)
         scroll_id = data['_scroll_id']
-    subprocess.run(f"""DELETE _search/scroll/_all""", shell=True, capture_output=False, text=False)
+    # subprocess.run(f"""DELETE _search/scroll/_all""", shell=True, capture_output=False, text=False)
     return data
 
 
