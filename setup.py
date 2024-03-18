@@ -16,7 +16,7 @@ core_requires = [
 ]
 
 setup(
-    name='mlx_grph',
+    name='DOTS',
     version='0.0.1',
     packages=find_packages(),
     platforms='any',

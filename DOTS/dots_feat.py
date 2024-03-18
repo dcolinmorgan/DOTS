@@ -12,18 +12,21 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
 import torch, spacy,nltk,subprocess, json, requests,string,csv,logging,os
-nltk.download('punkt')  # run once
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 load_dotenv()
 os_url = os.getenv('OS_TOKEN')
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Setup argument parser
 parser = argparse.ArgumentParser(description='Process OS data for dynamic features.')
 parser.add_argument('-n', type=int, default=10, help='Number of data items to get')
 parser.add_argument('-f', type=int, default=3, help='Number of features per item to get')
-parser.add_argument('-o', type=str, default='OS_feats.csv', help='Output file name')
+parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
 parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
 parser.add_argument('-s', type=datetime, default=20230101, help='start date')
 parser.add_argument('-e', type=datetime, default=20231231, help='end date')
@@ -56,8 +59,7 @@ def get_data(n=args.n, s=args.s, e=args.e):
         "query": {{
             "bool": {{
                 "must": [
-                    {{"match_all": {{}}}},
-                    {{"range": {{"metadata.GDELT_DATE": {{"gte": "{s}", "lte": "{e}"}}}}}}
+                    {{"match_all": {{}}}}
                 ]
             }}
         }}
@@ -84,21 +86,21 @@ def process_hit(hit):
         loc = None
     org = source['metadata']['Organizations']
     per = source['metadata']['Persons']
-    theme = source['metadata']['Themes']
+    theme = source['metadata']['Themes'].rsplit('_')[-1]
     title = source['metadata']['page_title']
     url = source['metadata']['DocumentIdentifier']
     try:
         response = requests.get(url)
     except requests.exceptions.ConnectionError:  #
-        logging.info(f"timeout for {url}")
+        logging.debug(f"timeout for {url}")
         return text,date,loc,title
     if response.status_code != 200:
-        logging.info(f"Failed to get {url}")
+        logging.debug(f"Failed to get {url}")
         return text,date,loc,title,org,per,theme
     soup = BeautifulSoup(response.text, 'html.parser')
     paragraphs = soup.find_all(['p'])
     if not paragraphs:
-        logging.info(f"No <p> tags in {url}")
+        logging.debug(f"No <p> tags in {url}")
         return text,date,loc,title,org,per,theme
     for p in paragraphs:
         text.append(p.get_text())
@@ -110,13 +112,13 @@ def process_data(data,fast=args.p):
     results=[]
     hits = data['hits']['hits']
     
-    for hit in tqdm(hits, desc="grabbing text from url"):
+    for hit in tqdm(hits, desc="attempting to grab text from url"):
         if fast==0:
             try:
                 results.append(process_hit(hit))
                 signal.alarm(5)
             except:
-                logging.info(f"Grabbing the url stalled after 5s, skipping...")
+                logging.debug(f"Grabbing the url stalled after 5s, skipping...")
                 pass
         else:
             e = concurrent.futures.ThreadPoolExecutor()
@@ -125,14 +127,23 @@ def process_data(data,fast=args.p):
                 result = future.result(timeout=5)  # Set timeout for 5 seconds
                 results.append(result)
             except concurrent.futures.TimeoutError:
-                logging.info(f"Grabbing the url stalled after 5s, skipping...")
+                logging.debug(f"Grabbing the url stalled after 5s, skipping...")
 
-    with open('output.csv', 'w') as file:
+    with open('DOTS/input/feat_input.csv', 'w') as file:
         writer = csv.writer(file)
-        for text,date,loc,title in results:
-            articles.append([loc,date,org,per,theme,text])
-            writer.writerow([loc,date,org,per,theme,text]) # force location into top feature, also assume title has important info
-            writer.writerow(['\n'])
+        for text,date,loc,title,org,per,theme in results:
+            if loc is None:
+                logging.debug(f"No location info, grabbing from org...")
+                loc = org
+            if text == None or text == []:
+                logging.debug(f"No text from url available, using org/persons/theme instead...")
+                articles.append([loc,date,None,org,per,theme])
+                writer.writerow([loc,date,None,org,per,theme])
+                writer.writerow(['\n'])
+            else:
+                articles.append([loc,date,text,None,None,None])
+                writer.writerow([loc,date,text,None,None,None])
+                writer.writerow(['\n'])
     signal.alarm(0)
     return articles
 
@@ -194,14 +205,16 @@ def main(args):
     data = get_data(args.n)
     articles = process_data(data)
     rank_articles=[]
-    for i in tqdm(articles, desc="featurizing articles' text"):
-        parts=str(i).split('[', 3)
+    for i in tqdm(articles, desc="featurizing articles"):
+        foreparts=str(i).split(',')[:2]  # location and date
+        meat="".join(str(i).split(',')[2:-3])  # text
+        aftparts=str(i).split(',')[-3:]  # org, per, theme
         try:
             cc=featurize_stories(str(i), top_k = args.f, max_len=512)
-            rank_articles.append([parts[1],cc])
+            rank_articles.append([foreparts,cc])
         except Exception as e:
             logging.error(f"Failed to process article: {e}")
-    with open(args.o, 'w', newline='') as file:
+    with open('DOTS/output/'+args.o, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(rank_articles)
 

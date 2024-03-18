@@ -1,6 +1,6 @@
 {
     "python.testing.pytestArgs": [
-        "mlx_grph"
+        "DOTS"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true

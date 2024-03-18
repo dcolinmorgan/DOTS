@@ -5,7 +5,7 @@ on:
   push
 
 env:
-  mlx_grph_DIR: mlx_grph
+  DOTS_DIR: DOTS
 
 jobs:
   featurize_news:
@@ -25,23 +25,23 @@ jobs:
 
     - name: Install test dependencies
       run: |
-          python -m venv mlx_grph
-          source mlx_grph/bin/activate
+          python -m venv DOTS
+          source DOTS/bin/activate
           python -m pip install --upgrade pip
           python -m pip install -e .
 
     - name: Minimal tests
       run: |
-          source mlx_grph/bin/activate
+          source DOTS/bin/activate
           python -m spacy download en_core_web_sm
-          python mlx_grph/test_DT_feat.py
+          python DOTS/test_dots_feat.py
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
     - name: Minimal tests 2
       run: |
-          source mlx_grph/bin/activate
+          source DOTS/bin/activate
           python -m spacy download en_core_web_sm
-          python mlx_grph/DT_feat.py -n 5 -f 3 -s 1 -o OS_feats.csv
+          python DOTS/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
