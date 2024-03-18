@@ -9,7 +9,7 @@ env:
 
 jobs:
   featurize_news:
-    name: OS news featurize pipeline
+    name: DT-OS_feat pipeline
     runs-on: ubuntu-latest
 
     strategy:
@@ -34,7 +34,7 @@ jobs:
       run: |
           source DOTS/bin/activate
           python -m spacy download en_core_web_sm
-          python test/test_dots_feat.py
+          python DOTS/test/test_dots_feat.py
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
@@ -42,6 +42,6 @@ jobs:
       run: |
           source DOTS/bin/activate
           python -m spacy download en_core_web_sm
-          python dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
+          python DOTS/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}

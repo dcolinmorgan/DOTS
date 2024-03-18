@@ -28,8 +28,8 @@ parser.add_argument('-n', type=int, default=10, help='Number of data items to ge
 parser.add_argument('-f', type=int, default=3, help='Number of features per item to get')
 parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
 parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
-parser.add_argument('-s', type=datetime, default=20230101, help='start date')
-parser.add_argument('-e', type=datetime, default=20231231, help='end date')
+# parser.add_argument('-s', type=datetime, default=20230101, help='start date')
+# parser.add_argument('-e', type=datetime, default=20231231, help='end date')
 args, unknown = parser.parse_known_args()
 
 # Load models and tokenizers
@@ -51,11 +51,15 @@ def handler(signum, frame):
 signal.signal(signal.SIGALRM, handler)
 
 # Define functions
-def get_data(n=args.n, s=args.s, e=args.e):
-    bash_command = f"""
-    curl -X GET "{os_url}" -H 'Content-Type: application/json' -d '{{
-"_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
+def get_data(n=args.n):  # , s=args.s, e=args.e):
+    bash_command1 = f"""
+    curl -X GET "{os_url}/emergency-management-news/_search?scroll=1m" -H 'Content-Type: application/json' -d '{{
+    "_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
         "size": {n},
+        "slice": {{
+            "id": 0,
+            "max": 10
+        }},
         "query": {{
             "bool": {{
                 "must": [
@@ -65,9 +69,36 @@ def get_data(n=args.n, s=args.s, e=args.e):
         }}
     }}'
     """
-    process = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
+    process = subprocess.run(bash_command1, shell=True, capture_output=True, text=True)
     output = process.stdout
     data = json.loads(output)
+
+    with open('DOTS/input/feat_input.json', 'w') as f:
+        json.dump(data, f)
+    with open("DOTS/input/feat_input.json", 'r') as f:
+        data = json.load(f)
+    # if n <=10000:
+        # return data
+    # else:
+    scroll_id = data['_scroll_id']
+
+    # Keep scrolling until no more results
+    while len(data['hits']['hits']):
+        # Process results
+        # ...
+
+        # Scroll request
+        bash_command2 = f"""
+        curl -X GET "{os_url}/_search/scroll" -H 'Content-Type: application/json' -d '{{
+            "scroll" : "1m",
+            "scroll_id" : "{scroll_id}"
+        }}'
+        """
+        process = subprocess.run(bash_command2, shell=True, capture_output=True, text=True)
+        output = process.stdout
+        data = json.loads(output)
+        scroll_id = data['_scroll_id']
+    subprocess.run(f"""DELETE _search/scroll/_all""", shell=True, capture_output=False, text=False)
     return data
 
 
