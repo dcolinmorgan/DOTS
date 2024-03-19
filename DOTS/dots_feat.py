@@ -8,6 +8,7 @@ from datetime import datetime
 import numpy as np
 import concurrent.futures
 from dotenv import load_dotenv
+from opensearchpy import OpenSearch
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
@@ -24,11 +25,11 @@ logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %
 
 # Setup argument parser
 parser = argparse.ArgumentParser(description='Process OS data for dynamic features.')
-parser.add_argument('-n', type=int, default=10, help='Number of data items to get')
+parser.add_argument('-n', type=int, default=10000, help='Number of data items to get')
 parser.add_argument('-f', type=int, default=3, help='Number of features per item to get')
 parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
 parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
-# parser.add_argument('-s', type=datetime, default=20230101, help='start date')
+parser.add_argument('-d', type=int, default=1, help='data size, 0 for small, 1 for large')
 # parser.add_argument('-e', type=datetime, default=20231231, help='end date')
 args, unknown = parser.parse_known_args()
 
@@ -54,7 +55,7 @@ signal.signal(signal.SIGALRM, handler)
 # Define functions
 def get_data(n=args.n):  # , s=args.s, e=args.e):
     bash_command = f"""
-    curl -X GET "{os_url}/emergency-management-news/_search" -H 'Content-Type: application/json' -d '{{
+    curl -X GET "{os_url}/emergency-management-news/_search?scroll=5m" -H 'Content-Type: application/json' -d '{{
     "_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
         "size": {n},
         "query": {{
@@ -73,48 +74,28 @@ def get_data(n=args.n):  # , s=args.s, e=args.e):
 
 
 def get_massive_data(n=args.n):
-    bash_command1 = f"""
-    curl -X GET "{os_url}/emergency-management-news/_search?scroll=1m" -H 'Content-Type: application/json' -d '{{
-    "_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
-        "size": {n},
-        "slice": {{
-            "id": 0,
-            "max": 10
-        }},
-        "query": {{
-            "bool": {{
+    client = OpenSearch(os_url)
+    query = {
+        "size": str(n),
+        "timeout": "10s",
+        "query": {
+            "bool": {
                 "must": [
-                    {{"match_all": {{}}}}
-                ]
-            }}
-        }}
-    }}'
-    """
-    process = subprocess.run(bash_command1, shell=True, capture_output=True, text=True)
-    output = process.stdout
-    data = json.loads(output)
-
-    with open('DOTS/input/feat_input.json', 'w') as f:
-        json.dump(data, f)
-    with open("DOTS/input/feat_input.json", 'r') as f:
-        data = json.load(f)
-
-    scroll_id = data['_scroll_id']
-
-    while len(data['hits']['hits']):
-
-        bash_command2 = f"""
-        curl -X GET "{os_url}/_search/scroll" -H 'Content-Type: application/json' -d '{{
-            "scroll" : "1m",
-            "scroll_id" : "{scroll_id}"
-        }}'
-        """
-        process = subprocess.run(bash_command2, shell=True, capture_output=True, text=True)
-        output = process.stdout
-        data = json.loads(output)
-        scroll_id = data['_scroll_id']
-    # subprocess.run(f"""DELETE _search/scroll/_all""", shell=True, capture_output=False, text=False)
-    return data
+                    {"match_all": {}},
+                ]}
+            },
+        "_source": ["metadata.GDELT_DATE", "metadata.page_title","metadata.DocumentIdentifier", "metadata.Organizations","metadata.Persons","metadata.Themes","metadata.text", "metadata.Locations"],
+    }
+    response = client.search(
+        scroll='1m',
+        body=query,
+    )
+    pagination_id = response["_scroll_id"]
+    response = client.scroll(
+        scroll='1m',
+        scroll_id=pagination_id
+    )
+    return response
 
 
 def process_hit(hit):
@@ -153,7 +134,7 @@ def process_hit(hit):
     return text,date,loc,title,org,per,theme
 
 
-def process_data(data,fast=args.p):
+def process_data(hits,fast=args.p):
     articles = []
     results=[]
     hits = data['hits']['hits']
@@ -248,8 +229,21 @@ def featurize_stories(text, top_k, max_len):
 
 # Main pipeline
 def main(args):
-    data = get_data(args.n)
-    articles = process_data(data)
+    if args.d == 0:
+        data = get_data(args.n)
+        articles = process_data(data)
+    else:
+        response = get_massive_data(args.n)
+        pagination_id = response["_scroll_id"]
+        hits = response["hits"]["hits"]
+        while len(hits) != 0:
+            articles=[]
+            client = OpenSearch(os_url)
+            response = client.scroll(
+                scroll='1m',
+                scroll_id=pagination_id
+                    )
+            articles.append(process_data(response))
     rank_articles=[]
     for i in tqdm(articles, desc="featurizing articles"):
         foreparts=str(i).split(',')[:2]  # location and date
