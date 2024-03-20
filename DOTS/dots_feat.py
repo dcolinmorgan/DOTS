@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %
 
 # Setup argument parser
 parser = argparse.ArgumentParser(description='Process OS data for dynamic features.')
-parser.add_argument('-n', type=int, default=10000, help='Number of data items to get')
+parser.add_argument('-n', type=int, default=1000, help='Number of data items to get')
 parser.add_argument('-f', type=int, default=3, help='Number of features per item to get')
 parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
 parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
@@ -78,6 +78,10 @@ def get_massive_data(n=args.n):
     query = {
         "size": str(n),
         "timeout": "10s",
+        "slice": {
+            "id": 0,
+            "max": 10
+        },
         "query": {
             "bool": {
                 "must": [
@@ -90,12 +94,8 @@ def get_massive_data(n=args.n):
         scroll='1m',
         body=query,
     )
-    pagination_id = response["_scroll_id"]
-    response = client.scroll(
-        scroll='1m',
-        scroll_id=pagination_id
-    )
-    return response
+
+    return response, client
 
 
 def process_hit(hit):
@@ -175,6 +175,34 @@ def process_data(hits,fast=args.p):
     return articles
 
 
+def process_response(response):
+    hits = response["hits"]["hits"]
+    output=[]
+    for hit in hits:
+        source = hit["_source"]
+        date = datetime.strptime(source['metadata']['GDELT_DATE'], "%Y%m%d%H%M%S")
+        date = formatted_date = date.strftime("%d-%m-%Y")
+        loc = source['metadata']['Locations']
+        loc = loc.replace("'", '"')  # json requires double quotes for keys and string values
+        try:
+            list_of_dicts = json.loads(loc)
+            location_full_names = [dict['Location FullName'] for dict in list_of_dicts if 'Location FullName' in dict]
+            loc = location_full_names[0]
+        except:
+            loc = None
+        org = source['metadata']['Organizations']
+        per = source['metadata']['Persons']
+        theme = source['metadata']['Themes'].rsplit('_')[-1]
+        title = source['metadata']['page_title']
+        url = source['metadata']['DocumentIdentifier']
+        output.append([date, loc, title, org, per, theme, url])
+
+    pagination_id=response['_scroll_id']
+    return pagination_id, output
+
+    
+
+
 def chunk_text(text, max_len):
     tokens = nltk.word_tokenize(text)
     num_chunks = len(tokens) // max_len
@@ -233,17 +261,23 @@ def main(args):
         data = get_data(args.n)
         articles = process_data(data)
     else:
-        response = get_massive_data(args.n)
+        response, client = get_massive_data(args.n)
         pagination_id = response["_scroll_id"]
         hits = response["hits"]["hits"]
+        articles=[]
         while len(hits) != 0:
-            articles=[]
-            client = OpenSearch(os_url)
+            # try:
             response = client.scroll(
-                scroll='1m',
+                scroll='5m',
                 scroll_id=pagination_id
                     )
-            articles.append(process_data(response))
+            hits = response["hits"]["hits"]
+            pagination_id, article = process_response(response)
+            articles.append(article)
+            # except:
+            #     print("A ConnectionTimeout error occurred.")
+            #     pass
+    articles = [item for sublist in articles for item in sublist]
     rank_articles=[]
     for i in tqdm(articles, desc="featurizing articles"):
         foreparts=str(i).split(',')[:2]  # location and date

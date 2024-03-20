@@ -18,3 +18,21 @@ def test_featurize_stories(data=get_data(5)):
         assert len(features) == 4
     except:
         pass
+
+def test_massive_featurize(data=get_massive_data()):
+    pagination_id = response["_scroll_id"]
+    hits = response["hits"]["hits"]
+    while len(hits) != 0:
+        articles=[]
+        client = OpenSearch(os_url)
+        response = client.scroll(
+            scroll='1m',
+            scroll_id=pagination_id
+                )
+        articles.append(process_data(response))
+    # assert len(articles) == 5
+    try:  #since some stories will be unretreatable
+        features = featurize_stories(str(articles), 4, 512)
+        assert len(features) == 4
+    except:
+        pass

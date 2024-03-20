@@ -10,6 +10,7 @@ core_requires = [
   'scikit-learn',
   'transformers',
   'torch',
+  'opensearchpy'
   'requests',
   'nltk',
   'numpy',

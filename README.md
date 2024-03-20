@@ -1,6 +1,8 @@
 # OpenSearch News Featurizer
 
+Using the OpenSearch API, this tool pulls news stories and extracts features from the text. The features are then stored in a CSV file.
 
+Using scroll and slice, the tool can now pull a large number of stories from OpenSearch.
 
 Clone current version & run [dots_feat.py](https://github.com/dcolinmorgan/DOTS/blob/main/DOTS/dots_feat.py)
 --------------------------------------------------

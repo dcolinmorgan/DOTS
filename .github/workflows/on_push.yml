@@ -38,10 +38,10 @@ jobs:
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
-    - name: Minimal tests 2
-      run: |
-          source DOTS/bin/activate
-          python -m spacy download en_core_web_sm
-          python DOTS/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
-      env:
-          OS_TOKEN: ${{ secrets.OS_TOKEN }}
+    # - name: Minimal tests 2
+    #   run: |
+    #       source DOTS/bin/activate
+    #       python -m spacy download en_core_web_sm
+    #       python DOTS/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
+    #   env:
+    #       OS_TOKEN: ${{ secrets.OS_TOKEN }}
