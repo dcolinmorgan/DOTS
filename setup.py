@@ -10,10 +10,12 @@ core_requires = [
   'scikit-learn',
   'transformers',
   'torch',
-  'opensearchpy'
+  'opensearchpy',
   'requests',
   'nltk',
   'numpy',
+  'xml',
+  'GNews',
 ]
 
 setup(

@@ -19,9 +19,9 @@
 # embeddings=[]
 # p = {'searchTerm':'"natural disaster"','numResults':'10'}
 
-# def get_npr_stories(p):
+# def get_npr_news(p):
 #     # Send a GET request to the NPR API
-#     r = requests.get("http://api.npr.org/query?apiKey=***", params=p)
+#     r = requests.get("http://api.npr.org/query?apiKey=npr_key", params=p)
 
 #     # Parse the XML response to get the story URLs
 #     root = ET.fromstring(r.content)
@@ -100,7 +100,7 @@
 # # full_stories = []
 # # for i in ['"extreme-weather"','"natural-disaster"','"epidemic"','"shooting"']:
 # #     p = {'searchTerm':i,'numResults':'50'}
-# #     fs=(get_npr_stories(p))
+# #     fs=(get_npr_news(p))
 # #     full_stories.append(fs)
 # # full_stories = [item for sublist in full_stories for item in sublist]
 # # len(full_stories)
