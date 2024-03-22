@@ -1,7 +1,7 @@
 import pytest, requests
-from dots.feat import chunk_text, featurize_stories
-from dots.scrape import get_OS_data, get_google_news, get_massive_OS_data, get_npr_news
-from dots.pull import process_hit, process_data, pull_data
+from DOTS.feat import chunk_text, featurize_stories
+from DOTS.scrape import get_OS_data, get_google_news, get_massive_OS_data, get_npr_news
+from DOTS.pull import process_hit, process_data, pull_data
 from datetime import datetime
 
 

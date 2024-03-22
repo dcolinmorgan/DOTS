@@ -2,6 +2,7 @@ import subprocess, json, argparse, os,requests
 from opensearchpy import OpenSearch
 from dotenv import load_dotenv
 from tqdm import tqdm
+from datetime import datetime, timedelta
 from gnews import GNews
 import xml.etree.ElementTree as ET
 load_dotenv()
@@ -104,3 +105,34 @@ def get_npr_news(p):
         full_story = ' '.join(p.text for p in story)
         full_stories.append(full_story)
     return full_stories
+
+
+def get_related_news(keyword:str, max)->list[dict]:
+    google_news = GNews()
+    end_date = datetime.now()
+    start_date = end_date - timedelta(seconds=30)
+    
+    results=[]
+    pbar = tqdm(total=max)
+    while len(results) < max:
+        google_news.start_date = (start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second)
+        google_news.end_date = (end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second)
+        r=google_news.get_news(keyword)
+        results.append(r)
+
+        with open('dots/input/BG_results.json', 'a') as f:
+            f.write(json.dumps(r))
+            f.write('\n')  # Add a newline character for readability
+        
+        # Add 30 seconds to start_date and end_date
+        start_date += timedelta(seconds=30)
+        end_date += timedelta(seconds=30)
+        
+        pbar.update(len(results) - pbar.n)
+        
+    pbar.close() 
+    sorted_results= sorted(results,
+                            key=lambda x: datetime.strptime(x['published date'], "%a, %d %b %Y %H:%M:%S %Z"),
+                            reverse=True)
+
+    return sorted_results
