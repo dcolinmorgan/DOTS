@@ -10,7 +10,7 @@ core_requires = [
   'scikit-learn',
   'transformers',
   'torch',
-  'opensearchpy',
+  'opensearch-py',
   'requests',
   'nltk',
   'numpy',
@@ -19,7 +19,7 @@ core_requires = [
 ]
 
 setup(
-    name='DOTS',
+    name='dots',
     version='0.0.1',
     packages=find_packages(),
     platforms='any',

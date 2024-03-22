@@ -5,7 +5,7 @@ on:
   push
 
 env:
-  DOTS_DIR: DOTS
+  DOTS_DIR: dots
 
 jobs:
   featurize_news:
@@ -25,23 +25,23 @@ jobs:
 
     - name: Install test dependencies
       run: |
-          python -m venv DOTS
-          source DOTS/bin/activate
+          python -m venv dots
+          source dots/bin/activate
           python -m pip install --upgrade pip
           python -m pip install -e .
 
     - name: Minimal tests
       run: |
-          source DOTS/bin/activate
+          source dots/bin/activate
           python -m spacy download en_core_web_sm
-          python DOTS/test/test_dots_feat.py
+          python dots/test/test_dots_feat.py
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
     # - name: Minimal tests 2
     #   run: |
-    #       source DOTS/bin/activate
+    #       source dots/bin/activate
     #       python -m spacy download en_core_web_sm
-    #       python DOTS/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
+    #       python dots/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
     #   env:
     #       OS_TOKEN: ${{ secrets.OS_TOKEN }}

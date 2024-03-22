@@ -27,10 +27,10 @@ def get_OS_data(n):
     return data
 
 
-def get_massive_OS_data(n,t=1):
+def get_massive_OS_data(t=1):
     client = OpenSearch(os_url)
     query = {
-        "size": str(n),
+        "size": "100",
         "timeout": "10s",
         "slice": {
             "id": 0,

@@ -10,7 +10,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
 import torch, spacy,nltk,subprocess, json, requests,string,csv,logging,os
 from .scrape import get_OS_data, get_massive_OS_data, get_google_news
-from .pull import process_hit, process_data
+from .pull import process_hit, process_data, pull_data
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -106,18 +106,19 @@ def main(args):
         # articles = process_response(data)
         dname='small0_'
     elif args.d == 1:
-        response, client = get_massive_OS_data(args.n,args.t)
+        response, client = get_massive_OS_data(args.t)
         pagination_id = response["_scroll_id"]
         hits = response["hits"]["hits"]
         articles=[]
-        while len(hits) != 0:
+        while len(hits) != 0 and len(articles2) < args.n:
             response = client.scroll(
                 scroll=str(args.t)+'m',
                 scroll_id=pagination_id
                     )
             hits = response["hits"]["hits"]
-            article = process_data(response)
-            articles.append(article)
+            # article = process_data(response)
+            articles.append(hits)
+            articles2 = [item for sublist in articles for item in sublist]
         articles = [item for sublist in articles for item in sublist]
         dname='large1_'
     elif args.d == 2:
@@ -139,7 +140,7 @@ def main(args):
         except Exception as e:
             logging.error(f"Failed to process article: {e}")
 
-    with open('DOTS/output/'+dname+args.o, 'w', newline='') as file:
+    with open('dots/output/'+dname+args.o, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(rank_articles)
 
