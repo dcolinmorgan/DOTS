@@ -14,7 +14,6 @@ core_requires = [
   'requests',
   'nltk',
   'numpy',
-  'xml',
   'GNews',
 ]
 
