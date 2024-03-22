@@ -34,7 +34,7 @@ jobs:
       run: |
           source dots/bin/activate
           python -m spacy download en_core_web_sm
-          python dots/test/test_dots_feat.py
+          python DOTS/test/test_dots_feat.py
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
