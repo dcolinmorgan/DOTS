@@ -7,6 +7,7 @@ core_requires = [
   'spacy',
   'python-dotenv',
   'bs4',
+  'pandas',
   'scikit-learn',
   'transformers',
   'torch',
