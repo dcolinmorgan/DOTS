@@ -37,7 +37,7 @@ jobs:
           python DOTS/test/test_dots_feat.py
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
-          lobstr_key: ${{ secrets.LOBSTR_KEY }}
+          LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}
         
     # - name: Minimal tests 2
     #   run: |
@@ -46,4 +46,4 @@ jobs:
     #       python dots/dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
     #   env:
     #       OS_TOKEN: ${{ secrets.OS_TOKEN }}
-            lobstr_key: ${{ secrets.LOBSTR_KEY }}
+    #       LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}
