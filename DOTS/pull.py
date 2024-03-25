@@ -1,13 +1,8 @@
-import json, logging, requests, csv, concurrent.futures, signal
+import json, logging, requests, csv, concurrent.futures
 from tqdm import tqdm
-import concurrent.futures, requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
-
-def handler(signum, frame):
-    raise TimeoutError()
-signal.signal(signal.SIGALRM, handler)
 
 def process_hit(hit):
     text = []
@@ -28,7 +23,7 @@ def process_hit(hit):
     title = source['metadata']['page_title']
     url = source['metadata']['DocumentIdentifier']
     try:
-        response = requests.get(url)
+        response = requests.get(url,timeout=5)
     except requests.exceptions.ConnectionError:  #
         logging.debug(f"timeout for {url}")
         return date,loc,title,org,per,theme,text,url
@@ -47,11 +42,11 @@ def process_hit(hit):
 
 def process_hit_with_timeout(hit):
     try:
-        signal.alarm(5)
         return process_hit(hit)
     except:
         logging.debug(f"Grabbing the url stalled after 5s, skipping...")
         return None
+
 
 def process_data(data,fast=1):
     articles = []
@@ -61,15 +56,12 @@ def process_data(data,fast=1):
         for hit in tqdm(hits, desc="attempting to grab text from url"):
             try:
                 results.append(process_hit(hit))
-                signal.alarm(5)
             except:
                 logging.debug(f"Grabbing the url stalled after 5s, skipping...")
                 pass
     else:
-
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = list(tqdm(executor.map(process_hit_with_timeout, hits), total=len(hits), desc="attempting to grab text from url"))
-
     for date,loc,title,org,per,theme,text,url in results:
         if loc is None:
             logging.debug(f"No location info, grabbing from org...")
@@ -83,7 +75,6 @@ def process_data(data,fast=1):
             articles.append([date,loc,title,org,per,theme,text,url])
             # writer.writerow([date,loc,title,org,per,theme,text,url])
             # writer.writerow(['\n'])
-    signal.alarm(0)
     return articles
 
 
@@ -112,7 +103,7 @@ def process_response(response):
         url = source['metadata']['DocumentIdentifier']
         # output.append([date, loc, title, org, per, theme, url])
         try:
-            response = requests.get(url)
+            response = requests.get(url,timeout=5)
         except requests.exceptions.ConnectionError:  #
             logging.debug(f"timeout for {url}")
             return text,date,loc,title,org, per, theme
@@ -142,14 +133,19 @@ def extract_location(location_str):
     else:
         return None
 
+
 def process_url(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    paragraphs = soup.find_all(['p'])
-    text = []
-    for p in paragraphs:
-        text.append(p.get_text())
-    return text
+    try:
+        response = requests.get(url,timeout=5)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        paragraphs = soup.find_all(['p'])
+        text = []
+        for p in paragraphs:
+            text.append(p.get_text())
+        return text
+    except Exception as e:
+        # print(f"Error processing URL {url}: {e}")
+        return None
 
 
 def pull_data(articles):
@@ -159,5 +155,14 @@ def pull_data(articles):
     df.date=pd.to_datetime(df.date).dt.strftime('%d-%m-%Y')
     df['locc'] = df['location'].apply(extract_location)
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        df['text'] = list(executor.map(process_url, df['url']))
+        df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))
     return df.values.tolist()
+
+
+def pull_lobstr_gdoc():
+    url = 'https://docs.google.com/spreadsheets/d/178sqEWzqubH0znhx7Z6u9ig2EjCRvl0dUsA7b6hQpmY/export?format=csv'
+    df = pd.read_csv(url)
+    df = df[['published_at','url','title','short_description']]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))
+    return df[['published_at','short_description','text']].values.tolist()

@@ -125,8 +125,8 @@ def main(args):
         articles= get_google_news('disaster')
         dname='google2_'
     elif args.d == 3:
-        articles= get_npr_news('disaster')
-        dname='npr3_'
+        articles= pull_lobstr_gdoc()
+        dname='lobstr3_'
     rank_articles=[]
     for i in tqdm(articles, desc="featurizing articles"):
         try:

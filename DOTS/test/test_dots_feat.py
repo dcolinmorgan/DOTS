@@ -67,7 +67,6 @@ def test_massive_featurize(get_scroll_data,t=1):
     except:
         pass
 
-
 def test_gnews_featurize():
     articles= get_google_news('disaster',n=10)
     try:  #since some stories will be unretreatable
@@ -76,10 +75,18 @@ def test_gnews_featurize():
     except:
         pass
 
-# def test_npr_featurize():
-#     articles= get_npr_news('disaster')
-#     try:  #since some stories will be unretreatable
-#         features = featurize_stories(str(articles), 4, 512)
-#         assert len(features) == 4
-#     except:
-#         pass
+@pytest.fixture
+def get_lobstr_data():
+    return pull_lobstr_gdoc()
+
+def test_lobstry_data(get_lobstr_data):
+    articles = get_lobstr_data
+    assert len(articles) > 2500
+
+def test_lobstr_featurize(get_lobstr_data):
+    articles= get_lobstr_data()
+    try:  #since some stories will be unretreatable
+        features = featurize_stories(str(articles), 4, 512)
+        assert len(features) == 4
+    except:
+        pass
