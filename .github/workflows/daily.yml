@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '0 3 * * *'
 
+  #Enable UI-driven branch testing
+  workflow_dispatch:
+
 env:
   DOTS_DIR: dots
 
