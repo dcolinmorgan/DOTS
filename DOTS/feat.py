@@ -63,6 +63,7 @@ def chunk_text(text, max_len):
 
 def featurize_stories(text, top_k, max_len):
     # Extract candidate words/phrases
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     count = CountVectorizer(ngram_range=n_gram_range, stop_words=stop_words).fit([text])
     all_candidates = count.get_feature_names_out()
     doc = nlp(text)
@@ -77,17 +78,23 @@ def featurize_stories(text, top_k, max_len):
     all_nouns = nouns.union(noun_phrases)
     candidates = list(filter(lambda candidate: candidate in all_nouns, all_candidates))
     candidate_tokens = tokenizer(candidates, padding=True, return_tensors="pt")
-    # if device == 'cuda':
+    
     candidate_tokens = {k: v.to(device) for k, v in (candidate_tokens).items()}
     candidate_embeddings = model(**candidate_tokens)["pooler_output"]
-    candidate_embeddings = candidate_embeddings.detach()  # .to_numpy
+    if device == 'cuda':
+        candidate_embeddings = candidate_embeddings.detach().to_numpy
+    else:
+        candidate_embeddings = candidate_embeddings.detach()
     chunks = chunk_text(text, max_len)  # use this to chunk better and use less padding thus less memory but also less affect from averging
     for chunk in chunks:
         text_tokens = tokenizer(chunk, padding=True, return_tensors="pt")
         # if device == 'cuda':
         text_tokens = {k: v.to(device) for k, v in (text_tokens).items()}
         text_embedding = model(**text_tokens)["pooler_output"]
-        text_embedding = text_embedding.detach()#.to_numpy()
+        if device == 'cuda':
+            text_embedding = text_embedding.detach().to_numpy()
+        else:
+            text_embedding = text_embedding.detach()
         embeddings.append(text_embedding)
     max_emb_shape = max(embedding.shape[0] for embedding in embeddings)
     padded_embeddings = [np.pad(embedding.cpu(), ((0, max_emb_shape - embedding.shape[0]), (0, 0))) for embedding in embeddings]

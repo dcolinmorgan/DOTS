@@ -79,7 +79,7 @@ def test_gnews_featurize():
 def get_lobstr_data():
     return pull_lobstr_gdoc()
 
-def test_lobstry_data(get_lobstr_data):
+def test_lobstr_data(get_lobstr_data):
     articles = get_lobstr_data
     assert len(articles) > 2500
 

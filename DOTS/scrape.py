@@ -108,18 +108,19 @@ def get_npr_news(p):
     return full_stories
 
 
-def pull_lobstr(page=1, limit=100):
-    values = {
-        "cluster": "65b9eea6e1cc6bb9f0cd2a47751a186f"
-    }
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': str({lobstr_key})
-    }
-    url = f'https://api.lobstr.io/v1/runs?page={page}&limit={limit}'
-    responseA = requests.get(url, headers=headers, params=values)
+# def pull_lobstr(page=1, limit=100):
+#     values = {
+#         "cluster": "65b9eea6e1cc6bb9f0cd2a47751a186f"
+#     }
+#     headers = {
+#         'Content-Type': 'application/json',
+#         'Authorization': str({lobstr_key})
+#     }
+#     url = f'https://api.lobstr.io/v1/runs?page={page}&limit={limit}'
+#     responseA = requests.get(url, headers=headers, params=values)
 
-    url = f'https://api.lobstr.io/v1/runs/{responseA.json()['run_id']}/download'
-    response = requests.get(url, headers=headers)
+
+#     url = f'https://api.lobstr.io/v1/runs/{responseA.json()['run_id']}/download'
+#     response = requests.get(url, headers=headers)
     
-    return response.json()
+#     return response.json()
