@@ -1,0 +1,50 @@
+
+name: Daily Run
+
+on: 
+  schedule:
+    - cron: '0 3 * * *'
+
+env:
+  DOTS_DIR: dots
+
+jobs:
+  featurize_news:
+    name: DT-OS_feat pipeline
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, '3.10', 3.11]
+
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        lfs: true
+
+    - name: Install test dependencies
+      run: |
+          python -m venv dots
+          source dots/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+    - name: Minimal tests
+      run: |
+          source dots/bin/activate
+          python -m spacy download en_core_web_sm
+          python DOTS/test/test_dots_feat.py
+      env:
+          OS_TOKEN: ${{ secrets.OS_TOKEN }}
+          LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}
+        
+    - name: post lobstr
+      run: |
+          source dots/bin/activate
+          python -m spacy download en_core_web_sm
+          python DOTS/feat.py -d 3
+      env:
+          OS_TOKEN: ${{ secrets.OS_TOKEN }}
+          LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}

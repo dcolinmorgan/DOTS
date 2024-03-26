@@ -160,9 +160,21 @@ def pull_data(articles):
 
 
 def pull_lobstr_gdoc():
+    articles = pd.read_csv('DOTS/input/lobstr_text.parquet')
     url = 'https://docs.google.com/spreadsheets/d/178sqEWzqubH0znhx7Z6u9ig2EjCRvl0dUsA7b6hQpmY/export?format=csv'
     df = pd.read_csv(url)
-    df = df[['published_at','url','title','short_description']]
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))
-    return df[['published_at','short_description','text']].values.tolist()
+    # if the story text is already gathered, process and return in list of lists format
+    if len(articles) == len(df):  
+        logging.info("Using cached lobstr data")
+        df = articles.dropna()
+        df = df[df['text'].apply(lambda x: (x) !="[]")]
+        df.reset_index(inplace=True)
+
+    # otherwise gather the story text from the URLs and save to parquet so that subsequent runs dont need to request again
+    else:  
+        df = df[['published_at','url','title','short_description']]
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))
+        df = df[['published_at','short_description','text']]
+        df.to_parquet('DOTS/input/lobstr_text.parquet')
+    return df.values.tolist()
