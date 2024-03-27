@@ -11,7 +11,7 @@ core_requires = [
   'pandas',
   'scikit-learn',
   'transformers',
-  'pytorch-cpu' if USE_CUDA==0 else 'torch',
+  'torch',
   'opensearch-py',
   'requests',
   'nltk',
