@@ -107,20 +107,29 @@ def get_npr_news(p):
         full_stories.append(full_story)
     return full_stories
 
+def scrape_lobstr():
+    subprocess.run([
+        'curl', 'https://api.lobstr.io/v1/runs?page=1&page_size=3000',
+        '-H', 'Accept: application/json',
+        '-H', f"Authorization: Token {lobstr_key}",
+        '-o', 'input/runs.json'
+    ])
 
-# def pull_lobstr(page=1, limit=100):
-#     values = {
-#         "cluster": "65b9eea6e1cc6bb9f0cd2a47751a186f"
-#     }
-#     headers = {
-#         'Content-Type': 'application/json',
-#         'Authorization': str({lobstr_key})
-#     }
-#     url = f'https://api.lobstr.io/v1/runs?page={page}&limit={limit}'
-#     responseA = requests.get(url, headers=headers, params=values)
+    with open("input/runs.json", 'r') as f:
+        runs = json.load(f)
+    juns=pd.DataFrame(runs['data'])
+    AA=juns[['id','cluster','total_unique_results']]
+    latest_success_run = AA.loc[AA['total_unique_results'].ne(0).idxmax()]
 
+    subprocess.run([
+        'curl', f"https://api.lobstr.io/v1/results?cluster=8de6e1bbf33f47b8bce451075b883252&run={latest_success_run['id']}&page=1&page_size=3000",
+        '-H', 'Accept: application/json',
+        '-H', f"Authorization: Token {lobstr_key}",
+        '-o', 'input/lobstr_results.json'
+    ])
 
-#     url = f'https://api.lobstr.io/v1/runs/{responseA.json()['run_id']}/download'
-#     response = requests.get(url, headers=headers)
-    
-#     return response.json()
+    with open("input/lobstr_results.json", 'r') as f:
+        data = json.load(f)
+
+    jata=pd.DataFrame(data['data'])
+    return jata  # [['published_at','url','title','short_description']]

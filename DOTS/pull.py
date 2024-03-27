@@ -3,6 +3,7 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
+from .scrape import scrape_lobstr
 
 def process_hit(hit):
     text = []
@@ -159,10 +160,13 @@ def pull_data(articles):
     return df.values.tolist()
 
 
-def pull_lobstr_gdoc():
-    articles = pd.read_csv('DOTS/input/lobstr_text.parquet')
-    url = 'https://docs.google.com/spreadsheets/d/178sqEWzqubH0znhx7Z6u9ig2EjCRvl0dUsA7b6hQpmY/export?format=csv'
-    df = pd.read_csv(url)
+def pull_lobstr_gdoc(pull=1):
+    articles = pd.read_parquet('DOTS/input/lobstr_text.parquet')
+    if pull==0:
+        url = 'https://docs.google.com/spreadsheets/d/178sqEWzqubH0znhx7Z6u9ig2EjCRvl0dUsA7b6hQpmY/export?format=csv'
+        df = pd.read_csv(url)
+    else:
+        df = scrape_lobstr()
     # if the story text is already gathered, process and return in list of lists format
     if len(articles) == len(df):  
         logging.info("Using cached lobstr data")
@@ -171,7 +175,7 @@ def pull_lobstr_gdoc():
         df.reset_index(inplace=True)
 
     # otherwise gather the story text from the URLs and save to parquet so that subsequent runs dont need to request again
-    else:  
+    else:
         df = df[['published_at','url','title','short_description']]
         with concurrent.futures.ThreadPoolExecutor() as executor:
             df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))

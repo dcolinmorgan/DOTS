@@ -1,8 +1,8 @@
-# OpenSearch News Featurizer
+# Current Events Scraper & Featurizer
 
-Using the OpenSearch API, this tool pulls news stories and extracts features from the text. The features are then stored in a CSV file.
+Using OpenSearch and Google News APIs, this tool pulls news stories and extracts features from the text. The features are then stored in a CSV file.
 
-Using scroll and slice, the tool can now pull a large number of stories from OpenSearch.
+Can gather stories from multiple sources and languages. GNews maxes out at ~3000 stories per day, OpenSearch has no limit.  OpenSearch uses scroll and slice to pull a large number of stories .
 
 Clone current version & run [dots_feat.py](https://github.com/dcolinmorgan/dots/blob/main/dots/dots_feat.py)
 --------------------------------------------------
@@ -12,9 +12,12 @@ bs4,
 scikit-learn,
 transformers,
 torch,
+opensearch-py,
 requests,
 xml,
 nltk,
+numpy,
+pandas
  
 ### the example below will pull 10 OS stories and return 5 features each in additon to location and date to a file
 
@@ -34,5 +37,5 @@ nltk,
 >"'Iceland', '16-01-2024', ","['lava flows', 'evacuation', 'eruptions', 'jóhannesson', 'lúðvík pétursson']"<br>
 
 
-here is an example produced every time CI runs:
- ![Table](dots/dots/output/dots_feats.csv)
+here is an example produced every day via `gh_actions` parsing GNews stories and extracting features:
+ [Table](DOTS/output/google_dots_feats.csv)
