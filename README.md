@@ -38,4 +38,4 @@ pandas
 
 
 here is an example produced every day via `gh_actions` parsing GNews stories and extracting features:
- [Table](DOTS/output/google_dots_feats.csv)
+ [Table](DOTS/output/lobstr3_dots_feats.csv)
