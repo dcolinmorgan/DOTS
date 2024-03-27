@@ -15,7 +15,6 @@ core_requires = [
   'opensearch-py',
   'requests',
   'nltk',
-  'pandas'
   'numpy',
   'GNews',
 ]
