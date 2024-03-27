@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from tqdm import tqdm
 from datetime import datetime, timedelta
 from gnews import GNews
+import pandas as pd
 import xml.etree.ElementTree as ET
 load_dotenv()
 os_url = os.getenv('OS_TOKEN')
@@ -112,10 +113,10 @@ def scrape_lobstr():
         'curl', 'https://api.lobstr.io/v1/runs?page=1&page_size=3000',
         '-H', 'Accept: application/json',
         '-H', f"Authorization: Token {lobstr_key}",
-        '-o', 'input/runs.json'
+        '-o', 'DOTS/input/runs.json'
     ])
 
-    with open("input/runs.json", 'r') as f:
+    with open("DOTS/input/runs.json", 'r') as f:
         runs = json.load(f)
     juns=pd.DataFrame(runs['data'])
     AA=juns[['id','cluster','total_unique_results']]
@@ -125,10 +126,10 @@ def scrape_lobstr():
         'curl', f"https://api.lobstr.io/v1/results?cluster=8de6e1bbf33f47b8bce451075b883252&run={latest_success_run['id']}&page=1&page_size=3000",
         '-H', 'Accept: application/json',
         '-H', f"Authorization: Token {lobstr_key}",
-        '-o', 'input/lobstr_results.json'
+        '-o', 'DOTS/input/lobstr_results.json'
     ])
 
-    with open("input/lobstr_results.json", 'r') as f:
+    with open("DOTS/input/lobstr_results.json", 'r') as f:
         data = json.load(f)
 
     jata=pd.DataFrame(data['data'])

@@ -9,8 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoModel, AutoTokenizer
 import torch, spacy,nltk,subprocess, json, requests,string,csv,logging,os
-if __name__ == "__main__" and __package__ is None:
-    __package__ = "DOTS"
+
 from .scrape import get_OS_data, get_massive_OS_data, get_google_news, scrape_lobstr  # need .scrape and .pull for production
 from .pull import process_hit, process_data, pull_data, pull_lobstr_gdoc
 
