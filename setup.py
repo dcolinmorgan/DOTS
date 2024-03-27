@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 
 core_requires = [
   'pytest',
+  'pyarrow'
   'spacy',
   'python-dotenv',
   'bs4',
@@ -14,6 +15,7 @@ core_requires = [
   'opensearch-py',
   'requests',
   'nltk',
+  'pandas'
   'numpy',
   'GNews',
 ]
