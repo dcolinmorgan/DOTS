@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 core_requires = [
   'pytest',
-  'pyarrow'
+  'pyarrow',
   'spacy',
   'python-dotenv',
   'bs4',
