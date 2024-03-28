@@ -7,17 +7,20 @@ Can gather stories from multiple sources and languages. GNews maxes out at ~3000
 Clone current version & run [dots_feat.py](https://github.com/dcolinmorgan/dots/blob/main/dots/dots_feat.py)
 --------------------------------------------------
 requirements :
-spacy,
-bs4,
-scikit-learn,
-transformers,
-torch,
-opensearch-py,
-requests,
-xml,
-nltk,
-numpy,
-pandas
+  pytest,
+  pyarrow,
+  spacy,
+  python-dotenv,
+  bs4,
+  pandas,
+  scikit-learn,
+  transformers,
+  torch,
+  opensearch-py,
+  requests,
+  nltk,
+  numpy,
+  GNews,
  
 ### the example below will pull 10 OS stories and return 5 features each in additon to location and date to a file
 
@@ -37,5 +40,5 @@ pandas
 >"'Iceland', '16-01-2024', ","['lava flows', 'evacuation', 'eruptions', 'jóhannesson', 'lúðvík pétursson']"<br>
 
 
-here is an example produced every day via `gh_actions` parsing GNews stories and extracting features:
- [Table](DOTS/output/lobstr3_dots_feats.csv)
+here is an example produced every day via `gh_actions` parsing gNews stories and extracting features:
+ [Feature Table](DOTS/output/lobstr3_dots_feats.csv) and [Full Table](DOTS/output/full_lobstr3_dots_feats.csv)

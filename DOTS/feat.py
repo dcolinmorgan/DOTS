@@ -2,13 +2,13 @@
 # python -m ipykernel install --user --name DT
 # pip install torch bs4 transformers spacy numpy pandas scikit-learn scipy nltk
 # import argparse
-# from tqdm import tqdm
-# from datetime import datetime
-# import numpy as np, pandas as pd
-# from sklearn.metrics.pairwise import cosine_similarity
-# from sklearn.feature_extraction.text import CountVectorizer
-# from transformers import AutoModel, AutoTokenizer
-# import torch, spacy,nltk,subprocess, json, requests,string,csv,logging,os
+from tqdm import tqdm
+from datetime import datetime
+import numpy as np, pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+from transformers import AutoModel, AutoTokenizer
+import torch, spacy,nltk,subprocess, json, requests,string,csv,logging,os
 
 # from .scrape import get_OS_data, get_massive_OS_data, get_google_news, scrape_lobstr  # need .scrape and .pull for production
 # from .pull import process_hit, process_data, pull_data, pull_lobstr_gdoc
