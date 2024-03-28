@@ -170,9 +170,12 @@ def pull_lobstr_gdoc(pull=1):
     # if the story text is already gathered, process and return in list of lists format
     if len(articles) == len(df):  
         logging.info("Using cached lobstr data")
-        df = articles.dropna()
-        df = df[df['text'].apply(lambda x: (x) !="[]")]
-        df.reset_index(inplace=True)
+        try:
+            df = articles.dropna()
+            df = df[df['text'].apply(lambda x: (x) !="[]")]
+            df.reset_index(inplace=True)
+        except:
+            df = articles
 
     # otherwise gather the story text from the URLs and save to parquet so that subsequent runs dont need to request again
     else:
