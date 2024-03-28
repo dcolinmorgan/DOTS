@@ -38,7 +38,7 @@ jobs:
       run: |
           source dots/bin/activate
           python -m spacy download en_core_web_sm
-          python DOTS/test/test_dots_feat.py
+          python -m DOTS/test/test_dots_feat.py
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
           LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}
@@ -47,7 +47,7 @@ jobs:
       run: |
           source dots/bin/activate
           python -m spacy download en_core_web_sm
-          python DOTS/feat.py -d 3
+          python -m DOTS/feat.py -d 3
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
           LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}
