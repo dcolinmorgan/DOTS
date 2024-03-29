@@ -34,7 +34,7 @@ jobs:
       run: |
           source dots/bin/activate
           python -m spacy download en_core_web_sm
-          python DOTS/test/test_dots_feat.py -n 5 -f 3 -s 1 -o dots_feats.csv
+          python DOTS/test/test_dots_feat.py -n 5 -f 3 -d 4 -o dots_feats.csv
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
           LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}

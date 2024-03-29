@@ -17,7 +17,7 @@ core_requires = [
   'nltk',
   'numpy',
   'GNews',
-  'graphistry[umap-learn]'
+  'graphistry[umap-learn]',
   'umap-learn'
 ]
 

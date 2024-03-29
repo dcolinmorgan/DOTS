@@ -80,13 +80,13 @@ def main(args):
         articles = get_google_news('disaster')
         dname = 'google2_'
     elif args.d == 3:
-        articles = pull_lobstr_gdoc()
+        articles = pull_lobstr_gdoc(args.n)
         dname = 'lobstr3_'
     elif args.d == 4:
-        response = get_test_gnews(100)
+        response = get_test_gnews(args.n)
         hits = response["hits"]["hits"]
         articles = pull_data(hits)
-        dname = 'test_gnews _'
+        dname = 'test_gnews_'
     rank_articles = []
     if device == 'cuda':
         dataloader = DataLoader(data['text'], batch_size=1, shuffle=True, num_workers=4)
