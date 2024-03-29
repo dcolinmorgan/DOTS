@@ -152,12 +152,15 @@ def process_url(url):
 def pull_data(articles):
     # aa = [item for sublist in articles for item in sublist]
     data = [list(d['_source']['metadata'].values()) for d in articles]
-    df = pd.DataFrame(data, columns=['date','title', 'person', 'org', 'location', 'theme', 'text', 'url'])
-    df.date=pd.to_datetime(df.date).dt.strftime('%d-%m-%Y')
-    df['locc'] = df['location'].apply(extract_location)
+    try:
+        df = pd.DataFrame(data, columns=['date','title', 'person', 'org', 'location', 'theme', 'text', 'url'])
+        df.date=pd.to_datetime(df.date).dt.strftime('%d-%m-%Y')
+        df['locc'] = df['location'].apply(extract_location)
+    except:
+        df = pd.DataFrame(data, columns=['title','id','url','title2'])
     with concurrent.futures.ThreadPoolExecutor() as executor:
         df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))
-    return df.values.tolist()
+    return df['text'].values.tolist()
 
 
 def pull_lobstr_gdoc(pull=1):

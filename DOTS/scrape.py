@@ -29,6 +29,44 @@ def get_OS_data(n):
     data = json.loads(output)
     return data
 
+def get_gnews_data(n):
+    bash_command = f"""
+    curl -X GET "{os_url}/test-google-news-index/_search" -H 'Content-Type: application/json' '{{
+    "_source": ["metadata.link", "metadata.title"],
+        "size": {n},
+        "query": {{
+            "bool": {{
+                "must": [
+                    {{"match_all": {{}}}}
+                ]
+            }}
+        }}
+    }}'
+    """
+    process = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
+    output = process.stdout
+    data = json.loads(output)
+    return data
+
+def get_test_gnews(n):
+    bash_command = f"""
+    curl -X GET "{os_url}/test-google-news-index/_search" '{{
+    "_source": ["metadata.link", "metadata.title"],
+        "size": {n},
+        "query": {{
+            "bool": {{
+                "must": [
+                    {{"match_all": {{}}}}
+                ]
+            }}
+        }}
+    }}'
+    """
+    process = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
+    output = process.stdout
+    data = json.loads(output)
+    return data
+
 
 def get_massive_OS_data(t=1):
     client = OpenSearch(os_url)

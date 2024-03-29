@@ -3,7 +3,7 @@ from DOTS.feat import chunk_text, featurize_stories
 from DOTS.scrape import get_OS_data, get_google_news, get_massive_OS_data, get_npr_news
 from DOTS.pull import process_hit, process_data, pull_data
 from datetime import datetime
-
+import pandas as pd
 
 @pytest.fixture
 def get_data():
@@ -90,3 +90,35 @@ def test_lobstr_featurize(get_lobstr_data):
         assert len(features) == 4
     except:
         pass
+@pytest.fixture
+def get_gdata():
+    return get_gnews_data(10)
+
+def test_get_test_gnews_data(get_gdata):
+    data = get_gdata
+    assert len(data['hits']['hits']) == 10
+
+def test_gnews_test(get_gdata):
+    rank_articles=[]
+    data = get_gdata
+    hits = response["hits"]["hits"]
+    articles = pull_data(hits)
+    try:  #since some stories will be unretreatable
+        cc = featurize_stories(str(articles), 4, 512)
+        assert len(cc) == 4
+        rank_articles.append(cc)
+    except:
+        pass
+    flattened_list = [item for sublist in rank_articles for item in sublist]
+    data=pd.DataFrame(flattened_list)  # each ranked feature is a row
+    data.drop_duplicates(inplace=True)
+
+    object_columns = data.select_dtypes(include=['object']).columns
+    data[object_columns] = data[object_columns].astype(str)
+    
+    g = graphistry.nodes(data)
+    g2 = g.umap()
+    g3 = g2.dbscan()
+    g3.encode_point_color('_dbscan',palette=["hotpink", "dodgerblue"],as_continuous=True).plot()
+
+    assert len(g3._nodes) > max(g3._nodes._dbscan)

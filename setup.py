@@ -17,6 +17,8 @@ core_requires = [
   'nltk',
   'numpy',
   'GNews',
+  'graphistry[umap-learn]'
+  'umap-learn'
 ]
 
 setup(
