@@ -40,15 +40,6 @@ def process_hit(hit):
         text.append(p.get_text())
     return date,loc,title,org,per,theme,text,url
 
-
-def process_hit_with_timeout(hit):
-    try:
-        return process_hit(hit)
-    except:
-        logging.debug(f"Grabbing the url stalled after 5s, skipping...")
-        return None
-
-
 def process_data(data,fast=1):
     articles = []
     results=[]
@@ -159,7 +150,7 @@ def pull_data(articles):
     except:
         df = pd.DataFrame(data, columns=['title','id','url','title2'])
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url'])))
+        df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url']),desc="grabbing text from url"))
     return df['text'].values.tolist()
 
 

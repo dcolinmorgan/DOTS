@@ -15,8 +15,8 @@ except LookupError:
 
 
 from DOTS.feat import chunk_text, featurize_stories
-from DOTS.scrape import get_OS_data, get_google_news, get_massive_OS_data, get_npr_news, scrape_lobstr
-from DOTS.pull import process_hit, process_data, pull_data, process_response, pull_lobstr_gdoc
+from DOTS.scrape import get_OS_data, scrape_lobstr,get_test_gnews
+from DOTS.pull import process_hit, process_data,process_response, pull_data, pull_lobstr_gdoc
 
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -29,7 +29,7 @@ def _input():
     parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
     # parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
     # parser.add_argument('-t', type=int, default=1, help='Scroll Timeout in minutes, if using "d=1" large data set')
-    parser.add_argument('-d', type=int, default=4, help='0 for a small amount, 1 for large, 2 for google news, 3 for lobstr, 4 for test_gnews')
+    parser.add_argument('-d', type=int, default=4, help='0 for OS, 1 for test_gnews, 2 for lobstr')
     # parser.add_argument('-e', type=datetime, default=20231231, help='end date')
     args, unknown = parser.parse_known_args()
     return args
@@ -53,36 +53,34 @@ args = _input()
 # Main pipeline
 def main(args):
     if args.d == 0:
-        # data = get_OS_data(args.n)
-        # articles = process_data(data)
         response = get_OS_data(args.n)
         hits = response["hits"]["hits"]
         articles = pull_data(hits)
         # articles = process_response(data)
         dname = 'small0_'
-    elif args.d == 1:
-        response, client = get_massive_OS_data(args.t)
-        pagination_id = response["_scroll_id"]
-        hits = response["hits"]["hits"]
-        articles = []
-        while len(hits) != 0 and len(articles2) < args.n:
-            response = client.scroll(
-                scroll=str(args.t)+'m',
-                scroll_id=pagination_id
-                    )
-            hits = response["hits"]["hits"]
-            # article = process_data(response)
-            articles.append(hits)
-            articles2 = [item for sublist in articles for item in sublist]
-        articles = [item for sublist in articles for item in sublist]
-        dname = 'large1_'
+    # elif args.d == 1:
+    #     response, client = get_massive_OS_data(args.t)
+    #     pagination_id = response["_scroll_id"]
+    #     hits = response["hits"]["hits"]
+    #     articles = []
+    #     while len(hits) != 0 and len(articles2) < args.n:
+    #         response = client.scroll(
+    #             scroll=str(args.t)+'m',
+    #             scroll_id=pagination_id
+    #                 )
+    #         hits = response["hits"]["hits"]
+    #         # article = process_data(response)
+    #         articles.append(hits)
+    #         articles2 = [item for sublist in articles for item in sublist]
+    #     articles = [item for sublist in articles for item in sublist]
+    #     dname = 'large1_'
+    # elif args.d == 2:
+    #     articles = get_google_news('disaster')
+    #     dname = 'google2_'
     elif args.d == 2:
-        articles = get_google_news('disaster')
-        dname = 'google2_'
-    elif args.d == 3:
         articles = pull_lobstr_gdoc(args.n)
         dname = 'lobstr3_'
-    elif args.d == 4:
+    elif args.d == 1:
         response = get_test_gnews(args.n)
         hits = response["hits"]["hits"]
         articles = pull_data(hits)
