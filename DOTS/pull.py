@@ -148,7 +148,7 @@ def pull_data(articles):
         df.date=pd.to_datetime(df.date).dt.strftime('%d-%m-%Y')
         df['locc'] = df['location'].apply(extract_location)
     except:
-        df = pd.DataFrame(data, columns=['title','id','url','title2'])
+        df = pd.DataFrame(data, columns=['url','title'])
     with concurrent.futures.ThreadPoolExecutor() as executor:
         df['text'] = list(tqdm(executor.map(process_url, df['url']), total=len(df['url']),desc="grabbing text from url"))
     return df['text'].values.tolist()

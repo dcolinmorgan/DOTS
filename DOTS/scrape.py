@@ -36,12 +36,12 @@ def get_OS_data(n=20):
 
 def get_test_gnews(n=20):
     bash_command = f"""
-    curl -X GET "{os_url}/test-google-news-index/_search?scroll=1m" '{{
-    "_source": ["metadata.link", "metadata.title"],
+    curl -X GET "{os_url}/test-google-news-index/_search?scroll=1m" -H 'Content-Type: application/json' -d '{{
+    "_source": ["metadata.title", "metadata.link"],
         "size": {n},
         "slice": {{
                 "id": 0,
-                "max": 100
+                "max": 10
             }},
         "query": {{
             "bool": {{

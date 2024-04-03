@@ -1,6 +1,6 @@
 import pytest, requests
 from DOTS.feat import chunk_text, featurize_stories
-from DOTS.scrape import get_OS_data, get_google_news, get_massive_OS_data, get_npr_news
+from DOTS.scrape import get_OS_data, get_test_gnews, scrape_lobstr
 from DOTS.pull import process_hit, process_data, pull_data
 from datetime import datetime
 import pandas as pd

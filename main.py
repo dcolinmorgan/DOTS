@@ -29,7 +29,7 @@ def _input():
     parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
     # parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
     # parser.add_argument('-t', type=int, default=1, help='Scroll Timeout in minutes, if using "d=1" large data set')
-    parser.add_argument('-d', type=int, default=4, help='0 for OS, 1 for test_gnews, 2 for lobstr')
+    parser.add_argument('-d', type=int, default=2, help='0 for OS, 1 for test_gnews, 2 for lobstr')
     # parser.add_argument('-e', type=datetime, default=20231231, help='end date')
     args, unknown = parser.parse_known_args()
     return args
