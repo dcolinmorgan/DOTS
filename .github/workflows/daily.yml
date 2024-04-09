@@ -3,7 +3,7 @@ name: Daily Run
 
 on: 
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 3 1 * *'
 
   #Enable UI-driven branch testing
   workflow_dispatch:

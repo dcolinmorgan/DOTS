@@ -3,7 +3,7 @@ from opensearchpy import OpenSearch
 from dotenv import load_dotenv
 from tqdm import tqdm
 from datetime import datetime, timedelta
-from gnews import GNews
+# from gnews import GNews
 import pandas as pd
 import xml.etree.ElementTree as ET
 load_dotenv()
@@ -39,10 +39,6 @@ def get_test_gnews(n=20):
     curl -X GET "{os_url}/test-google-news-index/_search?scroll=1m" -H 'Content-Type: application/json' -d '{{
     "_source": ["metadata.title", "metadata.link"],
         "size": {n},
-        "slice": {{
-                "id": 0,
-                "max": 10
-            }},
         "query": {{
             "bool": {{
                 "must": [

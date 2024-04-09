@@ -56,6 +56,15 @@ def main(args):
         response = get_OS_data(args.n)
         hits = response["hits"]["hits"]
         articles = pull_data(hits)
+        indices = [i for i, x in enumerate(articles) if len(str(x)) < 50]
+        # print(len(indices))
+        # for i in indices:
+        #     url = hits[i]['_source']['metadata']['link']
+        #     print(url)
+        #     try:
+        #         articles[i] = scrape_selenium_headless(url,browser='undetected_chrome')
+        #     except:
+        #         pass
         # articles = process_response(data)
         dname = 'small0_'
     # elif args.d == 1:
@@ -84,6 +93,15 @@ def main(args):
         response = get_test_gnews(args.n)
         hits = response["hits"]["hits"]
         articles = pull_data(hits)
+        indices = [i for i, x in enumerate(articles) if len(str(x)) < 50]
+        # print(len(indices))
+        for i in indices:
+            url = hits[i]['_source']['metadata']['link']
+            # print(url)
+            try:
+                articles[i] = scrape_selenium_headless(url,browser='undetected_chrome')
+            except:
+                pass
         dname = 'test_gnews_'
     rank_articles = []
     if device == 'cuda':
