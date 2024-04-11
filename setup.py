@@ -18,7 +18,13 @@ core_requires = [
   'numpy',
   'GNews',
   'graphistry[umap-learn]',
-  'umap-learn'
+  'umap-learn',
+  'validators',
+  'pytesseract',
+  'selenium',
+  'webdriver_manager,'
+  'undetected_chromedriver',
+  
 ]
 
 setup(

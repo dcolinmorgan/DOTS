@@ -57,35 +57,7 @@ def main(args):
         hits = response["hits"]["hits"]
         articles = pull_data(hits)
         indices = [i for i, x in enumerate(articles) if len(str(x)) < 50]
-        # print(len(indices))
-        # for i in indices:
-        #     url = hits[i]['_source']['metadata']['link']
-        #     print(url)
-        #     try:
-        #         articles[i] = scrape_selenium_headless(url,browser='undetected_chrome')
-        #     except:
-        #         pass
-        # articles = process_response(data)
         dname = 'small0_'
-    # elif args.d == 1:
-    #     response, client = get_massive_OS_data(args.t)
-    #     pagination_id = response["_scroll_id"]
-    #     hits = response["hits"]["hits"]
-    #     articles = []
-    #     while len(hits) != 0 and len(articles2) < args.n:
-    #         response = client.scroll(
-    #             scroll=str(args.t)+'m',
-    #             scroll_id=pagination_id
-    #                 )
-    #         hits = response["hits"]["hits"]
-    #         # article = process_data(response)
-    #         articles.append(hits)
-    #         articles2 = [item for sublist in articles for item in sublist]
-    #     articles = [item for sublist in articles for item in sublist]
-    #     dname = 'large1_'
-    # elif args.d == 2:
-    #     articles = get_google_news('disaster')
-    #     dname = 'google2_'
     elif args.d == 2:
         articles = pull_lobstr_gdoc(args.n)
         dname = 'lobstr3_'
@@ -109,25 +81,32 @@ def main(args):
         RR = dataloader
     else:
         RR = articles
-    for j,i in tqdm(enumerate(RR), total=len(RR), desc="featurizing articles"):
-    # for i in tqdm(articles, desc="featurizing articles"):
-        try:
-            foreparts = str(i).split(',')[:2]  # location and date
-        except:
-            foreparts=None
-        # meat="".join(str(j).split(',')[2:-3])  # text
-        try:
-            cc=featurize_stories(str(i), top_k = args.f, max_len=512)
-            rank_articles.append([foreparts,cc])
-            with open('DOTS/output/'+dname+args.o, 'a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerows([cc])
-        except Exception as e:
-            logging.error(f"Failed to process article: {e}")
+    if f == 0:
+        for j,i in tqdm(enumerate(RR), total=len(RR), desc="featurizing articles"):
 
-    with open('DOTS/output/full_'+dname+args.o, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(rank_articles)
+            try:
+                foreparts = str(i).split(',')[:2]  # location and date
+            except:
+                foreparts=None
+            # meat="".join(str(j).split(',')[2:-3])  # text
+            try:
+                cc=featurize_stories(str(i), top_k = args.f, max_len=512)
+                rank_articles.append([foreparts,cc])
+                with open('DOTS/output/'+dname+args.o, 'a', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerows([cc])
+            except Exception as e:
+                logging.error(f"Failed to process article: {e}")
+
+        with open('DOTS/output/full_'+dname+args.o, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(rank_articles)
+    elif f == 1:
+        df2, top_3_indices = g_feat(articles, top_k=3, n_topics=42)
+        with open('DOTS/output/g_feats_'+dname+args.o, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(top_3_indices)
+        df2.to_csv('DOTS/output/g_full_'+dname+args.o)
         
     # flattened_list = [item for sublist in rank_articles for item in sublist]
     # import pandas as pd
