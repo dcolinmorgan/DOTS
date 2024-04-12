@@ -30,14 +30,27 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
 
-    - name: Minimal tests
+    - name: gpy_feat tests
+      run: |
+          source dots/bin/activate
+          python DOTS/test/test_dots_feat.py -n 100 -e 1 -d 0 -o dots_gpy_feats.csv
+      env:
+          OS_TOKEN: ${{ secrets.OS_TOKEN }}
+    
+    - name: distilroberta tests
       run: |
           source dots/bin/activate
           python -m spacy download en_core_web_sm
-          python DOTS/test/test_dots_feat.py -n 5 -f 3 -d 4 -o dots_feats.csv
+          python DOTS/test/test_dots_feat.py -n 100 -e 0 -d 0 -o dots_drba_feats.csv
       env:
           OS_TOKEN: ${{ secrets.OS_TOKEN }}
-          LOBSTR_KEY: ${{ secrets.LOBSTR_KEY }}
+
+    - name: gliner tests
+      run: |
+          source dots/bin/activate
+          python DOTS/test/test_dots_feat.py -n 100 -e 2 -d 0 -o dots_glnr_feats.csv
+      env:
+          OS_TOKEN: ${{ secrets.OS_TOKEN }}
         
     # - name: Minimal tests 2
     #   run: |

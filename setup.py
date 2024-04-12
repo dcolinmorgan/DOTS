@@ -22,7 +22,7 @@ core_requires = [
   'validators',
   'pytesseract',
   'selenium',
-  'webdriver_manager,'
+  'webdriver_manager',
   'undetected_chromedriver',
   'gliner',
   
