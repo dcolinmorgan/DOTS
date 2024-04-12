@@ -25,8 +25,10 @@ requirements :
 ### the example below will pull 10 OS stories and return 5 features each in additon to location and date to a file
 
 ```python
-    git clone https://github.com/dcolinmorgan/dots
-    python dots/dots_feat.py -n 10 -f 5  
+    git clone https://github.com/graphistry/dots
+    python dots/dots_feat.py -n 100 -e 0 -d 0 -o dots_drba_feats.csv
+    python dots/dots_feat.py -n 100 -e 1 -d 0 -o dots_gpy_feats.csv  
+    python dots/dots_feat.py -n 100 -e 2 -d 0 -o dots_glnr_feats.csv  
 ```
 
 >"'Gaza Strip', '16-01-2024', ","['neighborhoods', 'rebels', 'widespread famine', 'egypt', 'disease']" <br>
