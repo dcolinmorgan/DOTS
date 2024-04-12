@@ -25,12 +25,12 @@ def _input():
     # Setup argument parser
     parser = argparse.ArgumentParser(description='Process OS data for dynamic features.')
     parser.add_argument('-n', type=int, default=100, help='Number of data items to get')
-    parser.add_argument('-f', type=int, default=5, help='Number of features per item to get')
+    # parser.add_argument('-f', type=int, default=5, help='Number of features per item to get')
     parser.add_argument('-o', type=str, default='dots_feats.csv', help='Output file name')
     # parser.add_argument('-p', type=int, default=1, help='Parallelize requests')
     # parser.add_argument('-t', type=int, default=1, help='Scroll Timeout in minutes, if using "d=1" large data set')
-    parser.add_argument('-d', type=int, default=2, help='0 for OS, 1 for test_gnews, 2 for lobstr')
-    # parser.add_argument('-e', type=datetime, default=20231231, help='end date')
+    parser.add_argument('-d', type=int, default=1, help='0 for OS, 1 for test_gnews, 2 for lobstr')
+    parser.add_argument('-e', type=int, default=1, help='0 for distilroberta, 1 for pyg, 2 for gliner')
     args, unknown = parser.parse_known_args()
     return args
 
@@ -81,7 +81,7 @@ def main(args):
         RR = dataloader
     else:
         RR = articles
-    if f == 0:
+    if args.e == 0:
         for j,i in tqdm(enumerate(RR), total=len(RR), desc="featurizing articles"):
 
             try:
@@ -101,12 +101,16 @@ def main(args):
         with open('DOTS/output/full_'+dname+args.o, 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(rank_articles)
-    elif f == 1:
+    elif args.e == 1:
         df2, top_3_indices = g_feat(articles, top_k=3, n_topics=42)
         with open('DOTS/output/g_feats_'+dname+args.o, 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(top_3_indices)
         df2.to_csv('DOTS/output/g_full_'+dname+args.o)
+    elif args.e == 2:
+        df2 = g_feat(articles, hits)
+        df2.to_csv('DOTS/output/gliner_full_'+dname+args.o,sep='\t')
+
         
     # flattened_list = [item for sublist in rank_articles for item in sublist]
     # import pandas as pd

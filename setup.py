@@ -24,6 +24,7 @@ core_requires = [
   'selenium',
   'webdriver_manager,'
   'undetected_chromedriver',
+  'gliner',
   
 ]
 
