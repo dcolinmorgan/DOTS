@@ -20,9 +20,16 @@ requirements :
   requests,
   nltk,
   numpy,
-  GNews,
+  graphistry[umap-learn],
+  umap-learn,
+  validators,
+  pytesseract,
+  selenium,
+  webdriver_manager,
+  undetected_chromedriver,
+  gliner,
  
-### the example below will pull 10 OS stories and return 5 features each in additon to location and date to a file
+### the example below will pull 100 OS gnews stories and return features each in additon to location and date to a file
 
 ```python
     git clone https://github.com/graphistry/dots
